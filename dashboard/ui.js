@@ -3,7 +3,7 @@ let initialized = false;
 module.exports = function (RED) {
   if (!initialized) {
     initialized = true;
-    init(RED);
+    init(RED.httpNode || RED.httpAdmin);
   }
 
   return {
@@ -11,8 +11,12 @@ module.exports = function (RED) {
   };
 };
 
-function init(RED) {
-  console.log("ui initialize");
+const path = require("path");
+const serveStatic = require("serve-static");
+
+function init(app) {
+  app.use("/ui", serveStatic(path.join(__dirname, "/dist")));
+  console.log("react dashboard started at /ui");
 }
 
 function testFunc() {
