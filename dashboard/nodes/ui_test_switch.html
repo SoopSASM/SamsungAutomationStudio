@@ -1,0 +1,264 @@
+<style>
+    input[type=radio] {
+        opacity: 0;
+    }
+    input[type=radio] +label{
+        border:none;
+        color:white;
+        border-radius: 5px;
+    }
+    input[type=radio]:checked +label{
+        border: 3px solid #FD5988;
+    }
+    .styled1 {
+        background: linear-gradient(91.29deg, #1153FC 0%, #5F86FE 100%);
+    }
+    .styled2 {
+        background: linear-gradient(91.29deg, #FF7E42 0%, #FEBF7D 100%);
+    }
+    .styled3 {
+        background: linear-gradient(91.29deg, #FD5988 0%, #F8A899 100%);
+    }
+   .styled4 {
+        background: linear-gradient(91.29deg, #8443F6 0%, #7793FE 100%);
+    }
+</style>
+<script type="text/javascript">
+    RED.nodes.registerType('ui_test_switch', {
+        category: RED._("node-red-dashboard/ui_base:ui_base.label.category"),
+        color: 'rgb(255, 189, 27)',
+        defaults: {
+            name: {
+                value: ''
+            },
+            label: {
+                value: 'switch_name'
+            },
+            tooltip: {
+                value: ''
+            },
+            group: {
+                type: 'ui_group',
+                required: true
+            },
+            order: {
+                value: 0
+            },
+            width: {
+                value: 0,
+                validate: function(v) {
+                    var width = v || 0;
+                    var currentGroup = $('#node-input-group').val() || this.group;
+                    var groupNode = RED.nodes.node(currentGroup);
+                    var valid = !groupNode || +width <= +groupNode.width;
+                    $("#node-input-size").toggleClass("input-error", !valid);
+                    return valid;
+                }
+            },
+            height: {
+                value: 0
+            },
+            topic: {
+                value: 'topic',
+                validate: (RED.validators.hasOwnProperty('typedInput') ? RED.validators.typedInput('topicType') : function(v) {
+                    return true
+                })
+            },
+            topicType: {
+                value: 'msg'
+            },
+            style: {
+                value: ''
+            },
+            onvalue: {
+                value: true,
+                required: true,
+                validate: (RED.validators.hasOwnProperty('typedInput') ? RED.validators.typedInput('onvalueType') : function(v) {
+                    return true
+                })
+            },
+            onvalueType: {
+                value: 'bool'
+            },
+            onicon: {
+                value: ''
+            },
+            offvalue: {
+                value: false,
+                required: true,
+                validate: (RED.validators.hasOwnProperty('typedInput') ? RED.validators.typedInput('offvalueType') : function(v) {
+                    return true
+                })
+            },
+            offvalueType: {
+                value: 'bool'
+            },
+            officon: {
+                value: ''
+            },
+            animate: {
+                value: false
+            },
+            min: {
+                value: 0,
+                required: true,
+                validate: RED.validators.number()
+            },
+            max: {
+                value: 100,
+                required: true,
+                validate: RED.validators.number()
+            },
+            step: {
+                value: 1
+            },
+            colorPicking:{
+                value:'colorPicking1'
+            }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "ui_switch.png",
+        paletteLabel: 'new_switch',
+        outputLabels: function() {
+            return this.min + " - " + this.max;
+        },
+        label: function() {
+            return this.name || (~this.label.indexOf("{{") ? null : this.label) || 'new_switch';
+        },
+        labelStyle: function() {
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function() {
+
+            $("#node-input-size").elementSizer({
+                width: "#node-input-width",
+                height: "#node-input-height",
+                group: "#node-input-group"
+            });
+            $('#node-input-custom-icons').on("change", function() {
+                if ($('#node-input-custom-icons').val() === "default") {
+                    $(".form-row-custom-icons").hide();
+                } else {
+                    $(".form-row-custom-icons").show();
+                }
+            });
+
+            if (this.onicon !== "" || this.officon !== "") {
+                $('#node-input-custom-icons').val('custom');
+            } else {
+                $(".form-row-custom-icons").hide();
+                $('#node-input-custom-icons').change();
+            }
+
+            $('#node-input-onvalue').typedInput({
+                default: 'str',
+                typeField: $("#node-input-onvalueType"),
+                types: ['str', 'num', 'bool', 'json', 'bin', 'date', 'flow', 'global']
+            });
+
+            $('#node-input-offvalue').typedInput({
+                default: 'str',
+                typeField: $("#node-input-offvalueType"),
+                types: ['str', 'num', 'bool', 'json', 'bin', 'date', 'flow', 'global']
+            });
+
+            $('#node-input-topic').typedInput({
+                default: 'str',
+                typeField: $("#node-input-topicType"),
+                types: ['str', 'msg', 'flow', 'global']
+            });
+        },
+        oneditsave: function() {
+            if ($('#node-input-custom-icons').val() === 'default') {
+                $('#node-input-onicon').val('');
+                $('#node-input-officon').val('');
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="ui_test_switch">
+    <div class="form-row">
+        <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
+        <input type="text" id="node-input-group">
+    </div>
+    <div class="form-row">
+        <label for="node-input-color"><i class="fa fa fa-tint"></i> Color</label>
+        <input type="radio" name="colorPicking" id="colorPicking1" style="width: 0px;">
+        <label class="styled1" for="colorPicking1" style="width: 60px;text-align: center;">blue</label>
+        <input type="radio" name="colorPicking" id="colorPicking2" style="width: 0px;">
+        <label class="styled2" for="colorPicking2" style="width: 60px;text-align: center;">orange</label>
+        <input type="radio" name="colorPicking" id="colorPicking3" style="width: 0px;">
+        <label class="styled3" for="colorPicking3" style="width: 60px;text-align: center;">pink</label>
+        <input type="radio" name="colorPicking" id="colorPicking4" style="width: 0px;">
+        <label class="styled4" for="colorPicking4" style="width: 60px;text-align: center;">purple</label>
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-object-group"></i> Size</label>
+        <input type="hidden" id="node-input-width">
+        <input type="hidden" id="node-input-height">
+        <button class="editor-button" id="node-input-size"></button>
+    </div>
+    <div class="form-row">
+        <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
+        <input type="text" id="node-input-label">
+    </div>
+    <div class="form-row">
+        <label for="node-input-tooltip"><i class="fa fa-info-circle"></i> Tooltip</label>
+        <input type="text" id="node-input-tooltip" placeholder="optional tooltip">
+    </div>
+    <div class="form-row">
+        <label for="node-input-custom-icons"><i class="fa fa-picture-o"></i> Icon</label>
+        <select id="node-input-custom-icons" style="width:35%">
+            <option value="default">Default</option>
+            <option value="custom">Custom</option>
+        </select>
+        <span style="width:auto; padding-left:20px" class="form-row-custom-icons" for="node-input-animate"> Animate
+        <input type="checkbox" checked id="node-input-animate" style="display:inline-block; width:auto; vertical-align:baseline;"></span>
+    </div>
+    <div class="form-row form-row-custom-icons">
+        <label for="node-input-onicon" style="text-align:right;"><i class="fa fa-toggle-on"></i> On Icon</label>
+        <input type="text" id="node-input-onicon" style="width:120px">
+    </div>
+    <div class="form-row form-row-custom-icons">
+        <label for="node-input-officon" style="text-align:right;"><i class="fa fa-toggle-off"></i> Off Icon</label>
+        <input type="text" id="node-input-officon" style="width:120px">
+    </div>
+    <div class="form-row">
+        <label style="width:auto" for="node-input-onvalue"><i class="fa fa-envelope-o"></i> When clicked, send:</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-onvalue" style="padding-left:25px; margin-right:-25px">On Payload</label>
+        <input type="text" id="node-input-onvalue" style="width:70%">
+        <input type="hidden" id="node-input-onvalueType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-offvalue" style="padding-left:25px; margin-right:-25px">Off Payload</label>
+        <input type="text" id="node-input-offvalue" style="width:70%">
+        <input type="hidden" id="node-input-offvalueType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic" style="padding-left:25px; margin-right:-25px">Topic</label>
+        <input type="text" id="node-input-topic">
+        <input type="hidden" id="node-input-topicType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-className"><i class="fa fa-code"></i>  Class</label>
+        <input type="text" id="node-input-className" placeholder="Optional CSS class name(s) for widget" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-min"><i class="fa fa-arrows-h"></i> Range</label>
+        <span for="node-input-min">min</span>
+        <input type="text" id="node-input-min" style="width:60px">
+        <span for="not-input-max" style="margin-left:22px;">max</span>
+        <input type="text" id="node-input-max" style="width:60px">
+        <span for="not-input-step" style="margin-left:22px;">step</span>
+        <input type="text" id="node-input-step" style="width:60px">
+    </div>
+
+</script>
