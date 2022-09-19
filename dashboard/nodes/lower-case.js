@@ -1,12 +1,12 @@
 module.exports = function (RED) {
-  const ui = require("../ui")(RED);
+  const dashboard = require("../dashboard")(RED);
 
   function LowerCaseNode(config) {
     const node = this;
     RED.nodes.createNode(node, config);
 
     node.on("input", function (msg, send, done) {
-      node.log("input has arrived" + ui.testFunc());
+      node.log("input has arrived " + dashboard.testFunc());
       send =
         send ||
         function () {
