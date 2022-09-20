@@ -1,29 +1,27 @@
 import React from "react";
 import styled from "styled-components";
-import {
-  mainColor,
-  gradientColor,
-  fontSize,
-  fontColor,
-} from "../assets/DesignOption";
+import { fontSize, fontColor } from "../assets/DesignOption";
 
 // FIXME: mode에 따른 색상변경 있음
 // FIXME: Layout에 따른 배치 변경 있음
-// justify-content - flex-start, flex-end, space-between, space-evenly (row)
-// justify-content - center (column)
+const flexOption = [
+  ["row", "flex-start"],
+  ["row", "flex-end"],
+  ["row", "space-between"],
+  ["row", "space-evenly"],
+  ["column", "center"],
+];
 
 const height = 48; // FIXME: 추후 그리드 사이즈에 맞게 바뀔것, width도 마찬가지
 
 const BoardText = styled.div`
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-direction: ${flexOption[3][0]};
+  justify-content: ${flexOption[3][1]};
   align-items: center;
   width: 200px;
   height: ${height}px;
   font-size: ${fontSize.md};
-  font-family: "Pretendard-Regular";
-  font-weight: 400;
   color: ${fontColor.light};
   padding: 0;
   margin: 0;
@@ -33,7 +31,7 @@ const BoardText = styled.div`
   }
 
   #text-value {
-    font-weight: 700;
+    font-family: "Pretendard-Bold";
   }
 `;
 

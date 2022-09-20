@@ -15,7 +15,7 @@ const BoardButton = styled.button`
   width: 200px;
   height: ${height}px;
   font-size: ${fontSize.md};
-  font-family: "Pretendard-Bold";
+  font-family: "Pretendard-Medium";
   color: white;
   padding: 0.25em 1em;
   border: 0px;
