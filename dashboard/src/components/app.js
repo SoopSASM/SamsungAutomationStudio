@@ -1,14 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Button from "./Button";
 import Text from "./Text";
+import { initlaizeSocket, disconnectSocket } from "../utils/socket";
 import "./App.css";
 
-export default function App() {
+const App = () => {
+  useEffect(() => {
+    initlaizeSocket();
+
+    return () => {
+      disconnectSocket();
+    };
+  }, []);
+
   return (
     <>
-      <div>Hello Dashboard App</div>
+      <div>Hello Dashboard</div>
       <Button />
       <Text />
     </>
   );
-}
+};
+
+export default App;
