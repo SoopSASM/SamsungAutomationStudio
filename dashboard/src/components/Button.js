@@ -8,7 +8,7 @@ const height = 48; // FIXME: 추후 그리드 사이즈에 맞게 바뀔것, wid
 
 const BoardButton = styled.button`
   background: linear-gradient(
-    90deg,
+    91.29deg,
     ${mainColor.blue} 0%,
     ${gradientColor.blue} 100%
   );
@@ -24,9 +24,9 @@ const BoardButton = styled.button`
 
 const Button = () => {
   return (
-    <div>
+    <>
       <BoardButton>이것은 Button노드</BoardButton>
-    </div>
+    </>
   );
 };
 

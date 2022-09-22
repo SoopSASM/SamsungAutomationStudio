@@ -25,28 +25,29 @@ const BoardText = styled.div`
   color: ${fontColor.light};
   padding: 0;
   margin: 0;
+`;
 
-  div {
-    margin: 0px 10px;
-  }
+const BoardTextLabel = styled.div`
+  margin: 0px 10px;
+`;
 
-  #text-value {
-    font-family: "Pretendard-Bold";
-  }
+const BoardTextValue = styled.div`
+  margin: 0px 10px;
+  font-family: "Pretendard-Bold";
 `;
 
 const Text = () => {
   return (
-    <div>
+    <>
       <BoardText>
-        <div id="text-label">
+        <BoardTextLabel>
           <span>label</span>
-        </div>
-        <div id="text-value">
+        </BoardTextLabel>
+        <BoardTextValue>
           <span>value</span>
-        </div>
+        </BoardTextValue>
       </BoardText>
-    </div>
+    </>
   );
 };
 
