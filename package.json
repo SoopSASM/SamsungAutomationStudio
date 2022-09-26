@@ -27,7 +27,8 @@
       "DB": "302-DB.js",
       "SlackNotification": "303-SlackNotification.js",
       "soopLowerCase": "dashboard/nodes/soopLowerCase.js",
-      "soopDashboardConfig": "dashboard/nodes/soopDashboardConfig.js"
+      "soopDashboardConfig": "dashboard/nodes/soopDashboardConfig.js",
+      "test-node": "dashboard/nodes/test-node.js"
     }
   },
   "dependencies": {
