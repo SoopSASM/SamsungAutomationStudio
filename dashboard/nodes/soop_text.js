@@ -25,7 +25,7 @@ module.exports = function (RED) {
       format: config.format,
       layout: config.layout,
       fontSize: config.fontSize,
-      value: "",
+      value: config.value,
     };
 
     node.on("input", function (msg) {
