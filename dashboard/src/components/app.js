@@ -19,13 +19,7 @@ const { SOOP_NODE_TYPE } = require("../../common/common");
 
 const App = () => {
   const dispatch = useDispatch();
-  const node = useSelector(state => state.node);
-  const [nodes, setNodes] = useState({});
-
-  useEffect(() => {
-    setNodes(node.nodes);
-  }, [node]);
-
+  const dashboard = useSelector(state => state.dashboard);
   const [isEditing, setIsEditing] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
 
@@ -41,13 +35,49 @@ const App = () => {
             groupName: "그룹이름 1",
             x: 0,
             y: 0,
-            w: 2,
+            w: 4,
             h: 4,
             nodes: [{}, {}],
           },
           {
             groupId: "그룹ID 2 (숫자)",
             groupName: "그룹이름 2",
+            x: 0,
+            y: 0,
+            w: 4,
+            h: 4,
+            nodes: [{}, {}],
+          },
+          {
+            groupId: "그룹ID 3 (숫자)",
+            groupName: "그룹이름 3",
+            x: 0,
+            y: 0,
+            w: 4,
+            h: 4,
+            nodes: [{}, {}],
+          },
+          {
+            groupId: "그룹ID 4 (숫자)",
+            groupName: "그룹이름 4",
+            x: 0,
+            y: 0,
+            w: 2,
+            h: 4,
+            nodes: [{}, {}],
+          },
+          {
+            groupId: "그룹ID 5 (숫자)",
+            groupName: "그룹이름 5",
+            x: 0,
+            y: 0,
+            w: 2,
+            h: 4,
+            nodes: [{}, {}],
+          },
+          {
+            groupId: "그룹ID 6 (숫자)",
+            groupName: "그룹이름 6",
             x: 0,
             y: 0,
             w: 2,
@@ -141,8 +171,23 @@ const App = () => {
         return <SoopDropdown key={node.editor.id} node={node.editor} states={node.states} />;
     }
   };
+  useEffect(() => {
+    console.log(dashboard);
+  }, [dashboard]);
 
-  return <>{Object.keys(nodes).map(key => drawNode(nodes[key]))}</>;
+  return <>dashboard</>;
+
+  // const drawNode = node => {
+  //   switch (node?.editor?.type) {
+  //     case SOOP_NODE_TYPE.SWITCH:
+  //       return <SoopSwitch key={node.editor.id} node={node.editor} />;
+  //     case SOOP_NODE_TYPE.SLIDER:
+  //       return <SoopSlider key={node.editor.id} node={node.editor} states={node.states} />;
+  //     case SOOP_NODE_TYPE.GAUGE:
+  //       return <SoopGauge key={node.editor.id} node={node.editor} states={node.states} />;
+  //   }
+  // };
+  // return <>{Object.keys(nodes).map(key => drawNode(nodes[key]))}</>;
 
   // return (
   //   <>
