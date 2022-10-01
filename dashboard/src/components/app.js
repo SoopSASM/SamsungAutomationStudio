@@ -137,6 +137,8 @@ const App = () => {
         return <SoopSlider key={node.editor.id} node={node.editor} states={node.states} />;
       case SOOP_NODE_TYPE.GAUGE:
         return <SoopGauge key={node.editor.id} node={node.editor} states={node.states} />;
+      case SOOP_NODE_TYPE.TEXT:
+        return <SoopText key={node.editor.id} node={node.editor} />;
     }
   };
 

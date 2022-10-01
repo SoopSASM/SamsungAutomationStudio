@@ -19,6 +19,7 @@ const SOOP_NODE_TYPE = {
   GAUGE: "soop_gauge",
   LIST: "soop_list",
   DROPDOWN: "soop_dropdown",
+  TEXT: "soop_text",
 };
 
 exports.FRONT_SOCKET_TYPE = FRONT_SOCKET_TYPE;
