@@ -5,7 +5,7 @@
     defaults: {
       group: { type: "soop_group", required: true },
       width: {
-        value: 0,
+        value: 1,
         validate: function (value) {
           const width = value || 0;
           const currentGroup = $("#node-input-group").val() || this.group;
@@ -15,7 +15,7 @@
           return valid;
         },
       },
-      height: { value: 0 },
+      height: { value: 1, validate: RED.validators.number(), required: true },
       widgetX: { value: 0, validate: RED.validators.number(), required: true },
       widgetY: { value: 0, validate: RED.validators.number(), required: true },
       label: { value: "chart_name" },
@@ -54,18 +54,117 @@
       return this.name ? "node_label_italic" : "";
     },
     oneditprepare: function () {
-      // 이후 삭제
-      $("#node-input-size").elementSizer({
-        width: "#node-input-width",
-        height: "#node-input-height",
-        group: "#node-input-group",
-      });
+      //////////////////////////////////////////////////////////////////////////////////////////////
+      // x,y,w,h가 주어졌을때, 해당 위치에 객체가 들어갈 수 있는지 확인
+      function validateXYWH(x, y, w, h, arr) {
+        // x, y, w, h가 arr를 넘어가는지 여부 확인
+        // 음수 인덱스 접근
+        if (x < 0 || y < 0 || w <= 0 || h <= 0 || w > 12 || x + w > arr[0].length || y + h > arr.length) {
+          return false;
+        }
+        // 해당 칸이 채워져 있는지 여부
+        for (let i = x; i < x + w; i++) {
+          for (let j = y; j < y + h; j++) {
+            if (arr[j][i]) {
+              return false;
+            }
+          }
+        }
+        return true;
+      }
+
+      // array의 크기 만큼 table 만들기
+      function newTable(arr) {
+        const row = arr.length;
+        const col = arr[0].length;
+        // append a row for column header(1,2,....)
+        $("#group-table>tbody").append('<tr id="col-header"></tr>');
+        $("#col-header").append("<th></th>");
+        for (let j = 0; j < col; j++) {
+          $("#col-header").append(`<th scope="col">${j}</th>`);
+        }
+        // append group row and col
+        for (let i = 0; i < row; i++) {
+          // append row
+          $("#group-table>tbody").append(`<tr id="row${i}"></tr>`);
+          // append a col for row header(1,2,...)
+          $(`#row${i}`).append(`<th scope="row" class="row-header">${i}</th>`);
+          // append col
+          for (let j = 0; j < col; j++) {
+            const tag = `<td id="col${j}" class="col ${arr[i][j] ? "filled" : "empty"}" ></td>`;
+            $(`#row${i}`).append(tag);
+          }
+        }
+        $(".col").css("border", "dotted black 1px");
+        $(".col").css("width", "20px");
+        $(".col").css("height", "20px");
+        $(".filled").css("background-color", "#DEDEDE");
+        $(".empty").css("background-color", "#FFFFFF");
+        $("th").css("border", "none");
+      }
+      function removeColor(w, h) {
+        for (let i = 0; i < w; i++) {
+          for (let j = 0; j < h; j++) {
+            $(`#row${i}>#col${j}`).removeClass("new-node");
+          }
+        }
+        $(".filled").css("background-color", "#DEDEDE");
+        $(".empty").css("background-color", "#FFFFFF");
+      }
+      function addColor(x, y, w, h) {
+        for (let i = x; i < x + w; i++) {
+          for (let j = y; j < y + h; j++) {
+            $(`#row${j}>#col${i}`).addClass("new-node");
+          }
+        }
+        $(".new-node").css("background-color", "#D9E5FF");
+      }
+
+      function addNewNode(arr) {
+        // remove 'new-node' class in every row-col
+        const x = parseInt($("#node-input-widgetX").val());
+        const y = parseInt($("#node-input-widgetY").val());
+        const w = parseInt($("#node-input-width").val());
+        const h = parseInt($("#node-input-height").val());
+        removeColor(arr[0].length, arr.length);
+        if (validateXYWH(x, y, w, h, arr)) {
+          addColor(x, y, w, h);
+          console.log(`x: ${x}, y: ${y}, w: ${w}, h: ${h}, validate: ${validateXYWH(x, y, w, h, arr)}`);
+        } else {
+          console.log(`You can not put a node on (${x}, ${y})`);
+        }
+      }
+
+      //
+      $.fn.groupTable = function (array1) {
+        $(this).append('<table border="1" id="group-table"><tbody></tbody></table>');
+
+        newTable(array1);
+        $("#node-input-widgetX").on("change", () => addNewNode(array1));
+        $("#node-input-widgetY").on("change", () => addNewNode(array1));
+        $("#node-input-width").on("change", () => addNewNode(array1));
+        $("#node-input-height").on("change", () => addNewNode(array1));
+      };
+      groupNode = RED.nodes.node(this.group);
+      groupNode._def.reflectEdit(this.group, this.id);
+      console.log(groupNode.groupState);
+      const array1 = groupNode.groupState;
+
+      /////////////////////////////////////////////////////////////////////////
+
+      $("#node-input-group-table").groupTable(array1);
 
       if (!$("#node-input-widgetX").val()) {
         $("#node-input-widgetX").val(0);
       }
       if (!$("#node-input-widgetY").val()) {
         $("#node-input-widgetY").val(0);
+      }
+      if (!$("#node-input-width").val()) {
+        $("#node-input-width").val(1);
+      }
+      if (!$("#node-input-height").val()) {
+        $("#node-input-height").val(1);
       }
 
       if (!$("#node-input-chartType").val()) {
@@ -111,7 +210,22 @@
         }
       });
     },
-    oneditsave: function () {},
+    oneditsave: function () {
+      groupNode = RED.nodes.node(this.group);
+      console.log(
+        $("#node-input-widgetX").val(),
+        $("#node-input-widgetY").val(),
+        $("#node-input-width").val(),
+        $("#node-input-height").val(),
+      );
+      groupNode._def.pushNodeToGroupState(
+        $("#node-input-widgetX").val(),
+        $("#node-input-widgetY").val(),
+        $("#node-input-width").val(),
+        $("#node-input-height").val(),
+        this.group,
+      );
+    },
   });
 </script>
 
@@ -121,10 +235,19 @@
     <input type="text" id="node-input-group" />
   </div>
   <div class="form-row">
-    <label for="node-input-size"><i class="fa fa-object-group"></i> Size</label>
-    <input type="hidden" id="node-input-width" />
-    <input type="hidden" id="node-input-height" />
-    <button class="editor-button" id="node-input-size"></button>
+    <label for="node-input-group-table"><i class="fa fa-table"></i> Group table</label>
+    <div id="node-input-group-table" style="width:70%; display: inline-block;">
+      <div style="margin-bottom:10px">
+        <label for="node-input-widgetX" style="width:auto;">x</label>
+        <input type="text" id="node-input-widgetX" value="0" style="width:30px; margin-right:10px;" />
+        <label for="node-input-widgetY" style="width:auto;">y </label>
+        <input type="text" id="node-input-widgetY" value="0" style="width:30px; margin-right:10px;" />
+        <label for="node-input-width" style="width:auto;">w</label>
+        <input type="text" id="node-input-width" value="1" style="width:30px; margin-right:10px;" />
+        <label for="node-input-height" style="width:auto;">h</label>
+        <input type="text" id="node-input-height" value="1" style="width:30px; margin-right:10px;" />
+      </div>
+    </div>
   </div>
   <div class="form-row">
     <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
