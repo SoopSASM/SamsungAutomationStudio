@@ -9,17 +9,19 @@ module.exports = function (RED) {
   return {
     emitState,
     addNode,
+    addGroup,
   };
 };
 
 const path = require("path");
 const socketio = require("socket.io");
 const serveStatic = require("serve-static");
-const { FRONT_SOCKET_TYPE, EDITOR_SOCKET_TYPE, DASHBOARD_PATH } = require("./common/common");
+const { FRONT_SOCKET_TYPE, EDITOR_SOCKET_TYPE, URL } = require("./common/common");
 
 let io = null;
 let globalNodes = {};
 let globalState = { tabs: [] };
+let globalGroups = {};
 
 function init(RED) {
   const app = RED.httpNode || RED.httpAdmin;
@@ -28,7 +30,21 @@ function init(RED) {
   io = socketio(server);
   initSocket(io);
 
-  app.use(DASHBOARD_PATH, serveStatic(path.join(__dirname, "/dist")));
+  app.use(URL.DASHBOARD, serveStatic(path.join(__dirname, "/dist")));
+
+  app.get(URL.GROUP_INFO, (req, res) => {
+    const query = req.query;
+    const group = globalGroups[query.id];
+    if (!group) res.status(204).send({ message: `Invalid Group Id : ${query.id}` });
+    const config = group.config;
+    if (!config) res.status(204).send({ message: `Group Info Not Found : ${query.id}` });
+
+    res.send({
+      width: config.width,
+      height: config.height,
+      state: config.groupState,
+    });
+  });
 }
 
 function initSocket(io) {
@@ -82,6 +98,11 @@ function addNode(nodeObject) {
     ...nodeObject,
     states: [],
   };
+}
+
+function addGroup(group) {
+  if (typeof group != "object") return;
+  globalGroups[group.id] = group;
 }
 
 function setState(state) {

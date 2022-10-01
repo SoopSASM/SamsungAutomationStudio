@@ -8,7 +8,10 @@ const EDITOR_SOCKET_TYPE = {
   FLOW_DEPLOYED: "flow-deployed",
 };
 
-const DASHBOARD_PATH = "/dashboard";
+const URL = {
+  DASHBOARD: "/dashboard",
+  GROUP_INFO: "/group",
+};
 
 const SOOP_NODE_TYPE = {
   CONFIG: "soop_dashboard_config",
@@ -25,5 +28,5 @@ const SOOP_NODE_TYPE = {
 
 exports.FRONT_SOCKET_TYPE = FRONT_SOCKET_TYPE;
 exports.EDITOR_SOCKET_TYPE = EDITOR_SOCKET_TYPE;
-exports.DASHBOARD_PATH = DASHBOARD_PATH;
+exports.URL = URL;
 exports.SOOP_NODE_TYPE = SOOP_NODE_TYPE;
