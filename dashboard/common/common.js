@@ -6,6 +6,8 @@ const FRONT_SOCKET_TYPE = {
 
 const EDITOR_SOCKET_TYPE = {
   FLOW_DEPLOYED: "flow-deployed",
+  ADD_NODE_TO_GROUP: "add-node-to-group",
+  REMOVE_NODE_FROM_GROUP: "remove-node-from-group",
 };
 
 const URL = {

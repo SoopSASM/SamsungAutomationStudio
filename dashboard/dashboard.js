@@ -17,6 +17,7 @@ const path = require("path");
 const socketio = require("socket.io");
 const serveStatic = require("serve-static");
 const { FRONT_SOCKET_TYPE, EDITOR_SOCKET_TYPE, URL } = require("./common/common");
+const { group } = require("console");
 
 let io = null;
 let globalNodes = {};
@@ -51,16 +52,46 @@ function initSocket(io) {
   io.on("connection", socket => {
     socket.emit(FRONT_SOCKET_TYPE.INIT_DASHBOARD_STATE, getState());
 
-    socket.on(EDITOR_SOCKET_TYPE.FLOW_DEPLOYED, state => {
-      setState(state);
-      io.emit(FRONT_SOCKET_TYPE.INIT_DASHBOARD_STATE, getState());
-    });
-
     socket.on(FRONT_SOCKET_TYPE.RECEIVE_MESSAGE, message => {
       const node = globalNodes[message.nodeId].runtime;
       if (!node) return;
       if (typeof node.onMessage === "function") {
         node.onMessage(message);
+      }
+    });
+
+    socket.on(EDITOR_SOCKET_TYPE.FLOW_DEPLOYED, state => {
+      setState(state);
+      io.emit(FRONT_SOCKET_TYPE.INIT_DASHBOARD_STATE, getState());
+    });
+
+    socket.on(EDITOR_SOCKET_TYPE.ADD_NODE_TO_GROUP, ({ groupId, x, y, w, h }) => {
+      const group = globalGroups[groupId];
+      if (!group) return;
+      const config = group.config;
+      if (!config) return;
+      const groupState = config.groupState;
+      if (!groupState || !Array.isArray(groupState)) return;
+
+      for (let i = x; i < x + w; ++i) {
+        for (let j = y; j < y + h; ++j) {
+          groupState[i][j] = true;
+        }
+      }
+    });
+
+    socket.on(EDITOR_SOCKET_TYPE.REMOVE_NODE_FROM_GROUP, ({ groupId, x, y, w, h }) => {
+      const group = globalGroups[groupId];
+      if (!group) return;
+      const config = group.config;
+      if (!config) return;
+      const groupState = config.groupState;
+      if (!groupState || !Array.isArray(groupState)) return;
+
+      for (let i = x; i < x + w; ++i) {
+        for (let j = y; j < y + h; ++j) {
+          groupState[i][j] = false;
+        }
       }
     });
   });
