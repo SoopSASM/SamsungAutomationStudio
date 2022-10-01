@@ -138,7 +138,7 @@ const App = () => {
       case SOOP_NODE_TYPE.GAUGE:
         return <SoopGauge key={node.editor.id} node={node.editor} states={node.states} />;
       case SOOP_NODE_TYPE.DROPDOWN:
-        return <SoopDropdown key={node.editor.id} node={node.editor} />;
+        return <SoopDropdown key={node.editor.id} node={node.editor} states={node.states} />;
     }
   };
 

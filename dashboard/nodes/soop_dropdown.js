@@ -18,17 +18,16 @@ module.exports = function (RED) {
     }
 
     var control = {
-      type: "dropdown",
-      multiple: config.multiple,
+      nodeId: node.id,
+      nodeType: "dropdown",
+      group: group,
+      size: [config.width || group.config.width || 3, config.height || 1],
       label: config.label,
       tooltip: config.tooltip,
-      place: config.place,
-      order: config.order,
-      value: config.payload || node.id,
       width: config.width || group.config.width || 3,
-      width: config.width || 3,
       height: config.height || 1,
-      className: config.className || "",
+      name: config.name || "",
+      time: "",
     };
 
     for (var o = 0; o < config.options.length; o++) {
@@ -37,7 +36,10 @@ module.exports = function (RED) {
     control.options = config.options;
 
     node.on("input", function (msg) {
-      node.topi = msg.topic;
+      dashboard.emitState({
+        node_id: node.id,
+        key: msg.payload,
+      });
     });
 
     dashboard.addNode({
