@@ -20,7 +20,6 @@ module.exports = function (RED) {
       } else {
         value = config.min;
       }
-      console.log(value);
       dashboard.emitState({
         nodeId: node.id,
         value: value,
