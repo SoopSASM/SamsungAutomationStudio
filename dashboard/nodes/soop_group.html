@@ -4,49 +4,48 @@
     function c_soop_group(x) {
         return RED._("soopsasm-dashboard/soop_group:soop_group." + x);
     }
-    RED.nodes.registerType('soop_group', {
-        category: 'config',
+    RED.nodes.registerType("soop_group", {
+        category: "config",
         defaults: {
             name: {
-                value: c_soop_group("label.default")
+                value: c_soop_group("label.default"),
             },
             tab: {
                 type: "soop_tab",
-                required: true
+                required: true,
             },
             order: {
-                value: 0
+                value: 0,
             },
             displayVisible: {
-                value: true
+                value: true,
             },
             width: {
-                value: 3
+                value: 3,
             },
             height: {
-                value: 2
+                value: 2,
             },
             groupX: {
-                value: 0
+                value: 0,
             },
             groupY: {
-                value: 0
+                value: 0,
             },
-
             disabled: {
-                value: false
+                value: false,
             },
             hidden: {
-                value: false
+                value: false,
             },
             groupState: {
-                value: new Array()
+                value: new Array(),
             },
             includedNodesId: {
-                value: new Array()
-            }
+                value: new Array(),
+            },
         },
-        paletteLabel: 'SOOPSASM GROUP',
+        paletteLabel: "SOOPSASM GROUP",
         label: function() {
             var tabNode = RED.nodes.node(this.tab);
             if (tabNode) {
@@ -57,40 +56,80 @@
         labelStyle: function() {
             return this.name ? "node_label_italic" : "";
         },
+        reflectEdit: function(gNode, nodeId) {
+            var groupNode = RED.nodes.node(gNode);
+            groupNode.includedNodesId = new Array();
+            //   console.log("this is groupNode");
+            //   console.log(groupNode);
+            RED.nodes.eachNode(function(node) {
+                if (groupNode.id == node.group && groupNode.includedNodesId.indexOf(node.id) < 0 && node.id !== nodeId) {
+                    groupNode.includedNodesId.push(node.id);
+                }
+            });
+            groupNode.groupState = new Array(groupNode.height);
+            for (var i = 0; i < groupNode.height; i++) {
+                groupNode.groupState[i] = Array.from({
+                        length: groupNode.width,
+                    },
+                    () => false,
+                );
+            }
+            for (var i = 0; i < groupNode.includedNodesId.length; i++) {
+                var tmpNode = RED.nodes.node(groupNode.includedNodesId[i]);
+                var tmpW = parseInt(tmpNode.width);
+                var tmpH = parseInt(tmpNode.height);
+                var tmpX = parseInt(tmpNode.widgetX);
+                var tmpY = parseInt(tmpNode.widgetY);
+                for (var j = tmpX; j < tmpX + tmpW; j++) {
+                    for (var k = tmpY; k < tmpY + tmpH; k++) {
+                        groupNode.groupState[k][j] = true;
+                    }
+                }
+            }
+            return groupNode;
+        },
         oneditprepare: function() {
-            console.log('oneditprepare');
-            //groupLocationDefaultSetting(this.tab);
-        }
-
+            tabNode = RED.nodes.node(this.tab);
+            var tmpValueXY = tabNode._def.groupLocationDefaultSetting(this.tab, this.id);
+            console.log('tmpValueXY:');
+            console.log(tmpValueXY);
+            this.groupX = tmpValueXY.gX;
+            this.groupY = tmpValueXY.gY;
+            document.getElementById("node-config-input-groupX").value = this.groupX;
+            document.getElementById("node-config-input-groupY").value = this.groupY;
+        },
     });
 </script>
 <script type="text/html" data-template-name="soop_group">
     <div class="form-row">
-        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="soop_group.label.name"></span></label>
-        <input type="text" id="node-config-input-name">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="soop_group.label.name"></span
+    ></label>
+        <input type="text" id="node-config-input-name" />
     </div>
     <div class="form-row">
-        <label for="node-config-input-tab"><i class="fa fa-table"></i> <span data-i18n="soop_group.label.tab"></span></label>
-        <input type="text" id="node-config-input-tab">
+        <label for="node-config-input-tab"><i class="fa fa-table"></i> <span data-i18n="soop_group.label.tab"></span
+    ></label>
+        <input type="text" id="node-config-input-tab" />
     </div>
 
     <div class="form-row">
         <label for="node-config-input-height"><span data-i18n="soop_group.label.height"></span></label>
-        <input id="node-input-height" />
+        <input id="node-config-input-height" />
     </div>
     <div class="form-row">
         <label for="node-config-input-width"><span data-i18n="soop_group.label.width"></span></label>
-        <input id="node-input-width" />
+        <input id="node-config-input-width" />
     </div>
     <div class="form-row">
         <label for="node-config-input-groupX"><span data-i18n="soop_group.label.x"></span></label>
-        <input id="node-input-groupY" />
+        <input id="node-config-input-groupX" />
     </div>
     <div class="form-row">
         <label for="node-config-input-groupY"><span data-i18n="soop_group.label.y"></span></label>
-        <input id="node-input-groupY" />
+        <input id="node-config-input-groupY" />
     </div>
     <div class="form-row">
-        <input style="margin:10px 0px 10px 102px; width:20px;" type="checkbox" checked id="node-config-input-disp"> <label style="width:auto" for="node-config-input-disp"><span data-i18n="soop_group.display-name"></span></label>
+        <input style="margin:10px 0px 10px 102px; width:20px;" type="checkbox" checked id="node-config-input-disp" />
+        <label style="width:auto" for="node-config-input-disp"><span data-i18n="soop_group.display-name"></span></label>
     </div>
 </script>
