@@ -4,51 +4,10 @@ module.exports = function (RED) {
   function SoopChartNode(config) {
     const node = this;
     RED.nodes.createNode(node, config);
+    dashboard.addNode({
+      node: node,
+    });
 
-    // const group = RED.nodes.getNode(config.group);
-    // if (!group) {
-    // node.error('Group is undefined.')
-    //   return;
-    // }
-    // var tab = RED.nodes.getNode(group.config.tab);
-    // if (!tab) {
-    // node.error('Tab is undefined.')
-    //   return;
-    // }
-    const group = "";
-    const chartType = config.chartType;
-    let state = {
-      // nodeId: node.id,
-      node_id: node.id,
-      nodeType: "chart",
-      group: group,
-      // tab: tab,
-      size: [
-        // parseInt(config.height || group.config.width / 2 + 1 || 4),
-        // parseInt(config.width || group.config.width || 6),
-        parseInt(4),
-        parseInt(6),
-        parseInt(config.widgetX),
-        parseInt(config.widgetY),
-      ],
-      // label: config.label,
-      title: config.label,
-      chartType: config.chartType,
-      legend: config.legend === "true" ? true : false,
-      blankLabel: config.blankLabel,
-      isTimeSeries: config.isTimeSeries,
-    };
-
-    if (chartType === "line" || chartType === "bar") {
-      state = Object.assign(state, {
-        xAxisFormat: config.xAxisFormat,
-        yMin: config.yMin ? parseInt(config.yMin) : "",
-        yMax: config.yMax ? parseInt(config.yMax) : "",
-        customValue: config.xAxisFormat === "custom" ? config.customValue : "",
-      });
-    }
-    // send state to dashboard
-    dashboard.emitState(state, config.isTimeSeries);
     node.on("input", function (msg, done) {
       if (isNaN(msg.payload)) {
         node.error("Payload is not a number.");
@@ -56,14 +15,12 @@ module.exports = function (RED) {
       }
       dashboard.emitState(
         {
-          node_id: node.id,
-          data: {
-            [msg.label]: {
-              value: parseInt(msg.payload),
-            },
-          },
+          nodeId: node.id,
+          value: +msg.payload,
+          label: msg.label,
         },
         config.isTimeSeries,
+        true,
       );
       // done
       if (done) done();

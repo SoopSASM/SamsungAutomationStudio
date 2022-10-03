@@ -24,16 +24,14 @@ const SoopBarChart = () => {
     "rgba(255, 135, 66, 1)",
   ];
   const exampleData = {
-    node: {
-      title: "bar timeseries chart",
-      chartType: "bar",
-      legend: true,
-      blankLabel: "no data",
-      xAxisFormat: "HH:mm:ss",
-      yMin: 0,
-      yMax: 5,
-      isTimeSeriesData: true,
-    },
+    title: "bar timeseries chart",
+    chartType: "bar",
+    legend: "false",
+    blankLabel: "no data",
+    xAxisFormat: "HH:mm:ss",
+    yMin: 0,
+    yMax: 5,
+    isTimeSeries: true,
     id: "노드의 id",
     states: {
       // TODO: nontime 버전
@@ -90,12 +88,8 @@ const SoopBarChart = () => {
   const [chartData, setChartData] = useState({ datasets: [] });
   const [chartOptions, setChartOptions] = useState({});
 
-  // const timeSeries = Date.now();
-  // const timeseriesToDateMoment = moment(timeSeries).format(exampleData.node.xAxisFormat);
-  // console.log("moment 변환", timeseriesToDateMoment);
-
   useEffect(() => {
-    if (!exampleData.node.isTimeSeriesData) {
+    if (!exampleData.isTimeSeries) {
       const currentChartData = {
         labels: Object.keys(exampleData.states),
         datasets: [
@@ -129,7 +123,7 @@ const SoopBarChart = () => {
           // 제목 변경
           title: {
             display: true,
-            text: exampleData.node.title,
+            text: exampleData.title,
             color: fontColor.light,
             font: {
               family: "Pretendard-Bold",
@@ -138,7 +132,7 @@ const SoopBarChart = () => {
           },
           // 범례 변경
           legend: {
-            display: exampleData.node.legend,
+            display: exampleData.legend === "true" ? true : false,
             labels: {
               font: {
                 family: "Pretendard-Regular",
@@ -151,8 +145,8 @@ const SoopBarChart = () => {
         // 축 변경
         scales: {
           y: {
-            min: exampleData.node.yMin,
-            max: exampleData.node.yMax,
+            min: exampleData.yMin,
+            max: exampleData.yMax,
             ticks: {
               font: {
                 family: "Pretendard-Light",
@@ -177,7 +171,7 @@ const SoopBarChart = () => {
     } else {
       const currentDatasetsLabel = Object.keys(exampleData.states);
       const currentLabels = exampleData.states[currentDatasetsLabel[0]].map(data =>
-        moment(data.time).format(exampleData.node.xAxisFormat),
+        moment(data.time).format(exampleData.xAxisFormat),
       );
       const currentDatasets = Object.keys(exampleData.states).map((key, idx) => {
         return {
@@ -199,7 +193,7 @@ const SoopBarChart = () => {
           // 제목 변경
           title: {
             display: true,
-            text: exampleData.node.title,
+            text: exampleData.title,
             color: fontColor.light,
             font: {
               family: "Pretendard-Bold",
@@ -208,7 +202,7 @@ const SoopBarChart = () => {
           },
           // 범례 변경
           legend: {
-            display: exampleData.node.legend,
+            display: exampleData.legend === "true" ? true : false,
             labels: {
               font: {
                 family: "Pretendard-Regular",
@@ -221,8 +215,8 @@ const SoopBarChart = () => {
         // 축 변경
         scales: {
           y: {
-            min: exampleData.node.yMin,
-            max: exampleData.node.yMax,
+            min: exampleData.yMin,
+            max: exampleData.yMax,
             ticks: {
               font: {
                 family: "Pretendard-Light",

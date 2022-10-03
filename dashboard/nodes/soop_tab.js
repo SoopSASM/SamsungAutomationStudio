@@ -1,12 +1,13 @@
-module.exports = function(RED) {
+module.exports = function (RED) {
+  function TabNode(config) {
+    const node = this;
+    RED.nodes.createNode(this, config);
+    this.config = {
+      name: config.name,
+      includedGroups: config.includedGroups,
+      includedGroupsName: config.includedGroupsName,
+    };
+  }
 
-    function TabNode(config) {
-        RED.nodes.createNode(this, config);
-        this.config = {
-            name: config.name,
-            includedGroups: config.includedGroups
-        };
-    }
-
-    RED.nodes.registerType("soop_tab", TabNode);
+  RED.nodes.registerType("soop_tab", TabNode);
 };

@@ -35,8 +35,8 @@ const App = () => {
             groupName: "그룹이름 1",
             x: 0,
             y: 0,
-            w: 4,
-            h: 4,
+            w: 1,
+            h: 1,
             nodes: [{}, {}],
           },
           {
@@ -63,7 +63,7 @@ const App = () => {
             x: 0,
             y: 0,
             w: 2,
-            h: 4,
+            h: 3,
             nodes: [{}, {}],
           },
           {
@@ -72,7 +72,7 @@ const App = () => {
             x: 0,
             y: 0,
             w: 2,
-            h: 4,
+            h: 3,
             nodes: [{}, {}],
           },
           {
@@ -136,14 +136,7 @@ const App = () => {
       },
     ],
   };
-  // const asdlkfjsadkfj;
 
-  // useEffect(() => {
-  //   asdlkfjsadkfj = currentTab'
-
-  // }, [currentTab])
-
-  // const exampleTab = ["우리집", "너네집", "으하"];
   const handleIsEditing = data => {
     setIsEditing(data);
   };
@@ -163,7 +156,7 @@ const App = () => {
     console.log(dashboard);
   }, [dashboard]);
 
-  return <>dashboard</>;
+  // return <>dashboard</>;
 
   // const drawNode = node => {
   //   switch (node?.editor?.type) {
@@ -175,34 +168,35 @@ const App = () => {
   //       return <SoopGauge key={node.editor.id} node={node.editor} states={node.states} />;
   //   }
   // };
+
   // return <>{Object.keys(nodes).map(key => drawNode(nodes[key]))}</>;
 
-  // return (
-  //   <>
-  //     <SoopNavbar
-  //       isEditing={isEditing}
-  //       handleIsEditing={handleIsEditing}
-  //       currentTab={currentTab}
-  //       handleCurrentTab={handleCurrentTab}
-  //       tmpData={tmpData}
-  //     />
+  return (
+    <>
+      <SoopNavbar
+        isEditing={isEditing}
+        handleIsEditing={handleIsEditing}
+        currentTab={currentTab}
+        handleCurrentTab={handleCurrentTab}
+        tmpData={tmpData}
+      />
 
-  //     {tmpData.tabs.map((tab, idx) => {
-  //       if (currentTab === idx) {
-  //         console.log(tab);
-  //         return <SoopGrid key={tab.tabId} isEditing={isEditing} currentTab={currentTab} tmpData={tmpData} tab={tab} />;
-  //       }
-  //     })}
-  //     {/* <SoopGroup />
-  //     <SoopList />
-  //     <SoopButton />
-  //     <SoopText />
-  //     <SoopSlider />
-  //     <SoopGauge />
-  //     <SoopChart />
-  //     <SoopDropdown /> */}
-  //   </>
-  // );
+      {tmpData.tabs.map((tab, idx) => {
+        if (currentTab === idx) {
+          console.log(tab);
+          return <SoopGrid key={tab.tabId} isEditing={isEditing} currentTab={currentTab} tmpData={tmpData} tab={tab} />;
+        }
+      })}
+      {/* <SoopGroup />
+      <SoopList />
+      <SoopButton />
+      <SoopText />
+      <SoopSlider />
+      <SoopGauge />
+      <SoopChart />
+      <SoopDropdown /> */}
+    </>
+  );
 };
 
 export default App;
