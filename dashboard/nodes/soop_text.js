@@ -5,11 +5,8 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     const node = this;
 
-    console.log(config);
-
     node.on("input", function (msg) {
       let labelForm = config.labelFormat.replace(/{{/g, "").replace(/}}/g, "").replace(/\s/g, "") || "_zzz_zzz_zzz_";
-      console.log(labelForm);
       let valueForm = config.valueFormat.replace(/{{/g, "").replace(/}}/g, "").replace(/\s/g, "") || "_zzz_zzz_zzz_";
       let labelParam = RED.util.normalisePropertyExpression(labelForm);
       let valueParam = RED.util.normalisePropertyExpression(valueForm);
