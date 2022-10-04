@@ -5,16 +5,36 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     const node = this;
 
-    node.on("input", function (msg) {
-      let form = config.format.replace(/{{/g, "").replace(/}}/g, "").replace(/\s/g, "") || "_zzz_zzz_zzz_";
-      if (form.split(".")[0] != "msg") return;
+    console.log(config);
 
-      form = form.split(".")[1];
-      let value = RED.util.getMessageProperty(msg, form);
-      if (value == undefined) value = "";
+    node.on("input", function (msg) {
+      let labelForm = config.labelFormat.replace(/{{/g, "").replace(/}}/g, "").replace(/\s/g, "") || "_zzz_zzz_zzz_";
+      console.log(labelForm);
+      let valueForm = config.valueFormat.replace(/{{/g, "").replace(/}}/g, "").replace(/\s/g, "") || "_zzz_zzz_zzz_";
+      let labelParam = RED.util.normalisePropertyExpression(labelForm);
+      let valueParam = RED.util.normalisePropertyExpression(valueForm);
+
+      let label = config.label;
+      let value = config.value;
+
+      if (labelParam.length > 1) {
+        label = msg;
+        for (var i = 1; i < labelParam.length; i++) {
+          label = RED.util.getMessageProperty(label, labelParam[i]);
+        }
+        if (!label) label = config.label;
+      }
+      if (valueParam.length > 1) {
+        value = msg;
+        for (var i = 1; i < valueParam.length; i++) {
+          value = RED.util.getMessageProperty(value, valueParam[i]);
+        }
+        if (!value) value = config.value;
+      }
 
       dashboard.emitState({
         nodeId: node.id,
+        label: label,
         value: value,
       });
     });
