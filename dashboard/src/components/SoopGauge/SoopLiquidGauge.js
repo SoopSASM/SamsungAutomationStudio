@@ -5,9 +5,8 @@ import { interpolateRgb } from "d3-interpolate";
 import LiquidFillGauge from "react-liquid-gauge";
 import { mainColor, gradientColor, fontColor, fontSize } from "../../assets/DesignOption";
 
-// FIXME: wh, 중 작은 사이즈에 맞추기!!
 const LiquidGaugeWrapper = styled.div`
-  width: 180px;
+  height: ${({ radius }) => `${radius}px;`}
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -20,37 +19,24 @@ const LiquidGaugeLabel = styled.div`
   color: ${fontColor.light};
   font-size: ${fontSize.md};
   font-family: "Pretendard-Bold";
-  margin: 0 auto 15px;
 `;
 
-const SoopLiquidGauge = () => {
-  const exampleData = {
-    node: {
-      nodeId: "dfg124w4",
-      gType: "donut",
-      label: "라벨입니당",
-      range: [0, 100],
-      units: "mg/l",
-      color: "green",
-    },
-    states: {
-      value: 70,
-    },
-  };
-
+const SoopLiquidGauge = ({ radius, node }) => {
   const [currentValue, setCurrentValue] = useState(1);
   const [currentLabel, setCurrentLabel] = useState("");
 
-  // FIXME: 사이즈 계산 후 변경되어야 한다. w/h 중 작은 크기의 반!
-  const radius = 90;
-
   useEffect(() => {
-    setCurrentValue(exampleData.states.value);
-    setCurrentLabel(exampleData.node.label);
-  }, []);
+    if (!node) return;
+    if (Array.isArray(node?.states) && node?.states[0]) {
+      setCurrentValue(node?.states[0].value);
+    } else {
+      setCurrentValue(node?.value);
+    }
+    setCurrentLabel(node?.label);
+  }, [node]);
 
-  const startColor = mainColor[exampleData.node.color];
-  const endColor = gradientColor[exampleData.node.color];
+  const startColor = mainColor[node?.color];
+  const endColor = gradientColor[node?.color];
 
   const interpolate = interpolateRgb(startColor, endColor);
   const fillColor = interpolate(currentValue / 100);
@@ -77,14 +63,14 @@ const SoopLiquidGauge = () => {
 
   return (
     <>
-      <LiquidGaugeWrapper>
+      <LiquidGaugeWrapper radius={radius}>
         <LiquidGaugeLabel>{currentLabel}</LiquidGaugeLabel>
         <LiquidFillGauge
           style={{ margin: "0 0" }}
-          width={radius * 2}
-          height={radius * 2}
-          value={currentValue}
-          unit={exampleData.node.units} // percent는 단위로
+          width={radius - 22}
+          height={radius - 22}
+          value={parseInt(currentValue)}
+          unit={node?.units}
           textSize={1}
           textOffsetX={0}
           textOffsetY={15}
@@ -122,14 +108,11 @@ const SoopLiquidGauge = () => {
           }}
           textStyle={{
             fill: color(fontColor.light).toString(),
-            fontFamily: "Arial",
+            fontFamily: "Pretendard-Medium",
           }}
           waveTextStyle={{
             fill: color("#fff").toString(),
-            fontFamily: "Arial",
-          }}
-          onClick={() => {
-            this.setState({ value: Math.random() * 100 });
+            fontFamily: "Pretendard-Medium",
           }}
         />
       </LiquidGaugeWrapper>

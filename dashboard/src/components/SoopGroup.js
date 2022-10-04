@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import SoopButton from "./SoopButton";
 import SoopChart from "./SoopChart";
@@ -8,6 +8,7 @@ import SoopImage from "./SoopImage";
 import SoopList from "./SoopList";
 import SoopSlider from "./SoopSlider";
 import SoopSwitch from "./SoopSwitch";
+import SoopText from "./SoopText";
 import { fontSize, fontColor } from "../assets/DesignOption";
 
 const { SOOP_NODE_TYPE } = require("../../common/common");
@@ -36,46 +37,131 @@ const GroupName = styled.div`
   padding: 3px 10px;
 `;
 
-const SoopGroup = ({ group, index }) => {
-  // TODO: 노드 그룹 정보들을 받아오면 그룹의 설정에 따라서 변경이 가능하다.
-  // 그리고 노드의 렌더링도 여기서 해야한다... ㅠㅜㅠㅜ
+const SoopGroup = ({ group }) => {
+  const [currentGroupWidth, setCurrentGroupWidth] = useState(100);
+  const ref = useRef(null);
+
   const drawNode = node => {
-    switch (node?.editor?.type) {
+    switch (node?.type) {
       case SOOP_NODE_TYPE.BUTTON:
-        return <SoopButton />;
+        return (
+          <SoopButton
+            key={node.id}
+            nodeId={node.id}
+            node={node}
+            currentGroupWidth={currentGroupWidth}
+            currentGroupW={parseInt(group.width)}
+            currentGroupH={parseInt(group.height)}
+            nameVisible={group.nameVisible}
+          />
+        );
       case SOOP_NODE_TYPE.CHART:
-        return <SoopChart />;
+        return (
+          <SoopChart
+            key={node.id}
+            nodeId={node.id}
+            node={node}
+            currentGroupWidth={currentGroupWidth}
+            currentGroupW={parseInt(group.width)}
+            currentGroupH={parseInt(group.height)}
+            nameVisible={group.nameVisible}
+          />
+        );
       case SOOP_NODE_TYPE.DROPDOWN:
-        return <SoopDropdown />;
+        return (
+          <SoopDropdown
+            key={node.id}
+            nodeId={node.id}
+            node={node}
+            currentGroupWidth={currentGroupWidth}
+            currentGroupW={parseInt(group.width)}
+            currentGroupH={parseInt(group.height)}
+            nameVisible={group.nameVisible}
+          />
+        );
       case SOOP_NODE_TYPE.GAUGE:
-        return <SoopGauge />;
+        return (
+          <SoopGauge
+            key={node.id}
+            nodeId={node.id}
+            node={node}
+            currentGroupWidth={currentGroupWidth}
+            currentGroupW={parseInt(group.width)}
+            currentGroupH={parseInt(group.height)}
+            nameVisible={group.nameVisible}
+          />
+        );
       case SOOP_NODE_TYPE.IMAGE:
-        return <SoopImage />;
+        return (
+          <SoopImage
+            key={node.id}
+            nodeId={node.id}
+            node={node}
+            currentGroupWidth={currentGroupWidth}
+            currentGroupW={parseInt(group.width)}
+            currentGroupH={parseInt(group.height)}
+            nameVisible={group.nameVisible}
+          />
+        );
       case SOOP_NODE_TYPE.LIST:
-        return <SoopList />;
+        return (
+          <SoopList
+            key={node.id}
+            nodeId={node.id}
+            node={node}
+            currentGroupWidth={currentGroupWidth}
+            currentGroupW={parseInt(group.width)}
+            currentGroupH={parseInt(group.height)}
+            nameVisible={group.nameVisible}
+          />
+        );
       case SOOP_NODE_TYPE.SLIDER:
-        return <SoopSlider />;
+        return (
+          <SoopSlider
+            key={node.id}
+            nodeId={node.id}
+            node={node}
+            currentGroupWidth={currentGroupWidth}
+            currentGroupW={parseInt(group.width)}
+            currentGroupH={parseInt(group.height)}
+            nameVisible={group.nameVisible}
+          />
+        );
       case SOOP_NODE_TYPE.SWITCH:
-        return <SoopSwitch key={node.editor.id} nodeId={node.editor.id} />;
+        return (
+          <SoopSwitch
+            key={node.id}
+            nodeId={node.id}
+            node={node}
+            currentGroupWidth={currentGroupWidth}
+            currentGroupW={parseInt(group.width)}
+            currentGroupH={parseInt(group.height)}
+            nameVisible={group.nameVisible}
+          />
+        );
       case SOOP_NODE_TYPE.TEXT:
-        return <SoopText />;
+        return (
+          <SoopText
+            key={node.id}
+            nodeId={node.id}
+            node={node}
+            currentGroupWidth={currentGroupWidth}
+            currentGroupW={parseInt(group.width)}
+            currentGroupH={parseInt(group.height)}
+            nameVisible={group.nameVisible}
+          />
+        );
     }
   };
-  const nameHidden = false;
-  // const currentGroupWidth = Group.current.offsetWidth;
+
+  useEffect(() => {
+    setCurrentGroupWidth(ref.current.offsetWidth);
+  }, []);
 
   return (
-    <Group>
-      {!nameHidden && <GroupName>{group.groupName}</GroupName>}
-      {group.nodes.map(node => {
-        drawNode(node);
-      })}
-      {/* <SoopButton /> */}
-      {/* <SoopSwitch nodeId={Math.random()} /> */}
-      {/* <SoopSlider /> */}
-      {/* <SoopChart /> */}
-      {/* <SoopGauge /> */}
-      <SoopImage />
+    <Group ref={ref}>
+      {group.nameVisible && <GroupName>{group.groupName}</GroupName>}
+      {group && Array.isArray(group.nodes) && group.nodes.map(node => drawNode(node))}
     </Group>
   );
 };

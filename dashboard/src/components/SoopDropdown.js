@@ -5,68 +5,63 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { sendMessage } from "../utils/socket";
+import { calculateHeight, calculateWidth, calculateLeft, calculateTop } from "../assets/DesignOption";
 
-// TODO: exampleData -> props
-// TODO: x, y, w, h에서 받아오면 계산하기
-// TODO: top, left 옵션줘서 위치 배정하기
 const DropdownContainer = styled.div`
   position: absolute;
-  top: 30px;
-
+  left: ${({ layout }) => `${layout[0]}px;`}
+  top: ${({ layout }) => `${layout[1]}px;`}
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  width: ${({ layout }) => `${layout[2]}px;`}
+  height:${({ layout }) => `${layout[3]}px;`}
   padding: 5px 10px;
   box-sizing: border-box;
 `;
 
-const SoopDropdown = ({ node, states }) => {
+const SoopDropdown = ({ currentGroupW, currentGroupWidth, currentGroupH, node, nameVisible }) => {
   const [selectedOption, setSelectedOption] = useState("");
   const [currentOptions, setCurrentOptions] = useState([]);
   const [currentLabel, setCurrentLabel] = useState("");
-  console.log(node);
-  const exampleData = {
-    node: {
-      label: "dropdown라벨",
-      tooltip: "dropdown node",
-      placeholder: "Select option",
-      option: { option1: "value1", option2: "value2" },
-    },
-    states: {},
-  };
+
+  const layout = [
+    calculateLeft(parseInt(node?.widgetX), currentGroupWidth, currentGroupW),
+    calculateTop(parseInt(node?.widgetY), currentGroupH, nameVisible),
+    calculateWidth(parseInt(node?.width), currentGroupWidth, currentGroupW),
+    calculateHeight(parseInt(node?.height), currentGroupH, nameVisible),
+  ];
 
   const onChange = e => {
     setSelectedOption(e.target.value);
-    // TODO: sendMessage 활성화하기
-    sendMessage(node.id, { value: e.target.value });
+    sendMessage(node?.id, { value: e.target.value });
   };
 
   useEffect(() => {
-    console.log("리액트 드롭다운 컴포넌트 결과: ", node, states);
-    const optionsArray = node.options.map(opt => {
+    const optionsArray = node?.options.map(opt => {
       return opt.label;
     });
-    if (Array.isArray(states) && states[0]) {
-      setSelectedOption(states[0].key);
+    if (Array.isArray(node?.states) && node?.states[0]) {
+      setSelectedOption(node?.states[0].key);
     }
     setCurrentOptions(optionsArray);
-    setCurrentLabel(node.label);
-  }, [node, states]);
+    setCurrentLabel(node?.label);
+  }, [node]);
 
   return (
     <>
-      <DropdownContainer>
+      <DropdownContainer layout={layout}>
         <FormControl fullWidth>
           <InputLabel id="soop-dashboard-select-label">{currentLabel}</InputLabel>
           <Select labelId="soop-dashboard-select-label" label={currentLabel} value={selectedOption} onChange={onChange}>
-            {currentOptions.map((cOption, idx) => {
-              return (
-                <MenuItem key={idx} value={idx}>
-                  {cOption}
-                </MenuItem>
-              );
-            })}
+            {Array.isArray(currentOptions) &&
+              currentOptions.map((cOption, idx) => {
+                return (
+                  <MenuItem key={idx} value={idx}>
+                    {cOption}
+                  </MenuItem>
+                );
+              })}
           </Select>
         </FormControl>
       </DropdownContainer>

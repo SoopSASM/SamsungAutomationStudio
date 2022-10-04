@@ -1,10 +1,24 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { fontColor, fontSize } from "../assets/DesignOption";
+import { calculateHeight, calculateWidth, calculateLeft, calculateTop } from "../assets/DesignOption";
 
 const ListContainer = styled.div`
+  position: absolute;
+  left: ${({ layout }) => `${layout[0]}px;`}
+  top: ${({ layout }) => `${layout[1]}px;`}
+  width: ${({ layout }) => `${layout[2]}px;`}
+  height:${({ layout }) => `${layout[3]}px;`}
+  padding: 5px 10px;
+  box-sizing: border-box;
   color: ${fontColor.light};
   font-size: ${fontSize.md};
+`;
+
+const ListWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 1px 0;
 `;
 
 const ListLabel = styled.span`
@@ -19,18 +33,18 @@ const ListLabel = styled.span`
   }};
 `;
 
-const SoopList = () => {
-  // FIXME: 전역 상태로 변경
-  const exampleData = {
-    type: "checkbox",
-    option: ["value1", "value2"],
-    checked: [true, false],
-    label: "라벨이당",
-    tooltip: "툴팁이당",
-  };
-  const [optionChecked, setOptionChecked] = useState(exampleData.checked);
+const SoopList = ({ currentGroupW, currentGroupWidth, currentGroupH, node, nameVisible }) => {
+  const oC = Array.from({ length: node?.options.length }, () => false);
+  const [optionChecked, setOptionChecked] = useState(oC);
 
-  const onClickCheck = (idx) => {
+  const layout = [
+    calculateLeft(parseInt(node?.widgetX), currentGroupWidth, currentGroupW),
+    calculateTop(parseInt(node?.widgetY), currentGroupH, nameVisible),
+    calculateWidth(parseInt(node?.width), currentGroupWidth, currentGroupW),
+    calculateHeight(parseInt(node?.height), currentGroupH, nameVisible),
+  ];
+
+  const onClickCheck = idx => {
     const tmpChecked = optionChecked.map((opt, i) => {
       if (idx === i) {
         return !optionChecked[i];
@@ -41,68 +55,68 @@ const SoopList = () => {
     setOptionChecked(tmpChecked);
   };
 
-  switch (exampleData.type) {
-    case "ordered":
+  switch (node?.listType) {
+    case "ol":
       return (
-        <ListContainer>
-          <ol>
-            {exampleData.option.map((item, idx) => {
-              return <li key={idx}>{item}</li>;
-            })}
+        <ListContainer layout={layout}>
+          <ol style={{ margin: 0 }}>
+            {node &&
+              Array.isArray(node.options) &&
+              node.options.map((item, idx) => {
+                return <li key={idx}>{item.value}</li>;
+              })}
           </ol>
         </ListContainer>
       );
-    case "unordered":
+    case "ul":
       return (
-        <ListContainer>
-          <ul>
-            {exampleData.option.map((item, idx) => {
-              return <li key={idx}>{item}</li>;
+        <ListContainer layout={layout}>
+          <ul style={{ margin: 0 }}>
+            {node?.options.map((item, idx) => {
+              return <li key={idx}>{item.value}</li>;
             })}
           </ul>
         </ListContainer>
       );
     case "checkbox":
       return (
-        <ListContainer>
-          {exampleData.option.map((item, idx) => {
-            return (
-              <div key={idx}>
-                {optionChecked[idx] ? (
-                  <>
-                    <input
-                      type="checkbox"
-                      id={idx}
-                      name={item}
-                      defaultChecked
-                      onClick={() => {
-                        onClickCheck(idx);
-                      }}
-                    />
-                    <ListLabel
-                      htmlFor={idx}
-                      idx={idx}
-                      optionChecked={optionChecked}
-                    >
-                      {item}
-                    </ListLabel>
-                  </>
-                ) : (
-                  <>
-                    <input
-                      type="checkbox"
-                      id={idx}
-                      name={item}
-                      onClick={() => {
-                        onClickCheck(idx);
-                      }}
-                    />
-                    <label htmlFor={idx}>{item}</label>
-                  </>
-                )}
-              </div>
-            );
-          })}
+        <ListContainer layout={layout}>
+          {node &&
+            Array.isArray(node.options) &&
+            node?.options.map((item, idx) => {
+              return (
+                <div key={idx}>
+                  {optionChecked[idx] ? (
+                    <ListWrapper>
+                      <input
+                        type="checkbox"
+                        id={idx}
+                        name={item.value}
+                        defaultChecked
+                        onClick={() => {
+                          onClickCheck(idx);
+                        }}
+                      />
+                      <ListLabel htmlFor={idx} idx={idx} optionChecked={optionChecked}>
+                        {item.value}
+                      </ListLabel>
+                    </ListWrapper>
+                  ) : (
+                    <ListWrapper>
+                      <input
+                        type="checkbox"
+                        id={idx}
+                        name={item.value}
+                        onClick={() => {
+                          onClickCheck(idx);
+                        }}
+                      />
+                      <label htmlFor={idx}>{item.value}</label>
+                    </ListWrapper>
+                  )}
+                </div>
+              );
+            })}
         </ListContainer>
       );
   }

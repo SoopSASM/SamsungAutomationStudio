@@ -1,67 +1,145 @@
 <script type="text/javascript">
+  const listPositionSelector = "#node-input-widgetX, #node-input-widgetY, #node-input-width, #node-input-height";
+  function getGroupGrid(nodeId) {
+    const groupId = $("#node-input-group").val();
+    const groupNode = RED.nodes.node(groupId);
+    groupNode._def.reflectEdit(groupId, nodeId);
+    return groupNode.groupState;
+  }
+  function getXYWH() {
+    const x = parseInt($("#node-input-widgetX").val());
+    const y = parseInt($("#node-input-widgetY").val());
+    const w = parseInt($("#node-input-width").val());
+    const h = parseInt($("#node-input-height").val());
+    return { x, y, w, h };
+  }
+  // Validate the widget to place on (x, y, w, h).
+  function validateXYWH(arr) {
+    const { x, y, w, h } = getXYWH();
+    // If x, y, w, h is under or over idx of arr -> return false
+    if (x < 0 || y < 0 || w <= 0 || h <= 0 || w > 12 || x + w > arr[0].length || y + h > arr.length) {
+      return false;
+    }
+    // If the space is alredy filled, return false
+    for (let i = x; i < x + w; i++) {
+      for (let j = y; j < y + h; j++) {
+        if (arr[j][i]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  // Create a table with array
+  function newTable(arr) {
+    const row = arr.length;
+    const col = arr[0].length;
+    // Append a row for column header(1,2,....)
+    $("#group-table>tbody").append('<tr id="col-header"></tr>');
+    $("#col-header").append("<th></th>");
+    for (let j = 0; j < col; j++) {
+      $("#col-header").append(`<th scope="col">${j}</th>`);
+    }
+    // Append group row and col
+    for (let i = 0; i < row; i++) {
+      // append row
+      $("#group-table>tbody").append(`<tr id="row${i}"></tr>`);
+      // Append a col for row header(1,2,...)
+      $(`#row${i}`).append(`<th scope="row" class="row-header">${i}</th>`);
+      // Append col
+      for (let j = 0; j < col; j++) {
+        const tag = `<td id="col${j}" class="col ${arr[i][j] ? "filled" : "empty"}" ></td>`;
+        $(`#row${i}`).append(tag);
+      }
+    }
+    // Table Design
+    $(".col").css("border", "dotted black 1px");
+    $(".col").css("width", "20px");
+    $(".col").css("height", "20px");
+    $(".filled").css("background-color", "#DEDEDE");
+    $(".empty").css("background-color", "#FFFFFF");
+    $("th").css("border", "none");
+  }
+  // Remove color for new node and return the original color for filled or empty space
+  function removeColor(w, h) {
+    for (let i = 0; i < w; i++) {
+      for (let j = 0; j < h; j++) {
+        $(`#row${j}>#col${i}`).removeClass("new-node");
+      }
+    }
+    $(".filled").css("background-color", "#DEDEDE");
+    $(".empty").css("background-color", "#FFFFFF");
+  }
+  // Add color for new node
+  function addColor() {
+    const { x, y, w, h } = getXYWH();
+    for (let i = x; i < x + w; i++) {
+      for (let j = y; j < y + h; j++) {
+        $(`#row${j}>#col${i}`).addClass("new-node");
+      }
+    }
+    $(".new-node").css("background-color", "#D9E5FF");
+  }
+  // Add new node on group grid
+  function addNewNode(arr) {
+    // Remove 'new-node' class in every row-col
+    const { x, y, w, h } = getXYWH();
+    removeColor(arr[0].length, arr.length);
+    // if (x, y, w, h) is ok, then put. or error.
+    if (validateXYWH(arr)) {
+      addColor();
+      $(listPositionSelector).removeClass("input-error");
+    } else {
+      $(listPositionSelector).addClass("input-error");
+    }
+  }
+  function changeGroup(arr) {
+    if ($("#node-input-group-table > table").length) {
+      const row = arr.length;
+      const col = arr[0].length;
+      const currow = $("#group-table>tbody>tr").length - 1;
+      const curcol = $("#group-table>tbody>#row1>td").length;
+      if (currow !== row || curcol !== col) {
+        $("#node-input-group-table").children("table").remove();
+        $("#node-input-group-table").append('<table border="1" id="group-table"><tbody></tbody></table>');
+        newTable(arr);
+        addNewNode(arr);
+        $(listPositionSelector).off();
+        $(listPositionSelector).on("change", () => addNewNode(arr));
+      }
+    }
+  }
   RED.nodes.registerType("soop_list", {
     category: "soop-dashboard",
-    color: "rgb(255, 189, 27)",
+    color: "#5F86FE",
     defaults: {
-      name: {
-        value: "",
-      },
-      label: {
-        value: "list_name",
-      },
-      group: {
-        type: "ui_group",
-        required: true,
-      },
-      width: {
-        value: 0,
-      },
-      height: {
-        value: 0,
-      },
-      tooltip: {
-        value: "",
-      },
+      name: { value: "" },
+      label: { value: "list_name" },
+      group: { type: "soop_group", required: true },
+      width: { value: 1, validate: RED.validators.number(), required: true },
+      height: { value: 1, validate: RED.validators.number(), required: true },
+      widgetX: { value: 0, validate: RED.validators.number(), required: true },
+      widgetY: { value: 0, validate: RED.validators.number(), required: true },
+      tooltip: { value: "list_node" },
       listType: { value: "ol" },
-      options: {
-        value: [{ check: false, value: "" }],
-      },
+      options: { value: [{ value: "" }] },
     },
     inputs: 1,
-    icon: "ui_dropdown.png",
-    paletteLabel: "new_list",
-    outputLabels: function () {
-      return this.min + " - " + this.max;
-    },
+    icon: "font-awesome/fa-list",
+    paletteLabel: "soop_list",
     label: function () {
-      return this.name || (~this.label.indexOf("{{") ? null : this.label) || "new_list";
+      return this.name || "soop_list";
     },
     labelStyle: function () {
       return this.name ? "node_label_italic" : "";
     },
     oneditprepare: function () {
-      if (this.listType === undefined) {
-        this.listType = "ol";
-        $("#node-input-type").val("ol");
-      }
-
-      $("#node-input-size").elementSizer({
-        width: "#node-input-width",
-        height: "#node-input-height",
-        group: "#node-input-group",
-      });
-
-      $("#node-input-listType").on("change", function () {
-        isCheckbox = false;
-        if ($(this).val() === "checkbox") isCheckbox = true;
-        else isCheckbox = false;
-
-        var options = $("#node-input-option-container").children();
-        options.each(function (i) {
-          if (isCheckbox) $(this).find(".node-input-option-check").show();
-          else $(this).find(".node-input-option-check").hide();
-        });
-      });
+      $.fn.groupTable = function (arr) {
+        $(this).append('<table border="1" id="group-table"><tbody></tbody></table>');
+        newTable(arr);
+        $(listPositionSelector).on("change", () => addNewNode(arr));
+      };
+      $("#node-input-group-table").groupTable(getGroupGrid(this.id));
 
       function generateOption(i, option) {
         var container = $("<li/>", {
@@ -78,13 +156,6 @@
         $(
           '<i style="color:#eee; cursor:move; margin-left:3px;" class="node-input-option-handle fa fa-bars"></i>',
         ).appendTo(row);
-
-        var checkField = $("<input/>", {
-          class: "node-input-option-check",
-          type: "checkbox",
-          style: "margin-left:7px;width:calc(5%);",
-          checked: option.check == "on" ? true : false,
-        }).appendTo(row);
 
         var valueField = $("<input/>", {
           class: "node-input-option-value",
@@ -129,6 +200,10 @@
         handle: ".node-input-option-handle",
         cursor: "move",
       });
+
+      $("#node-input-group").on("change", () => {
+        changeGroup(getGroupGrid(this.id));
+      });
     },
     oneditsave: function () {
       var options = $("#node-input-option-container").children();
@@ -137,12 +212,14 @@
       options.each(function (i) {
         var option = $(this);
         var o = {
-          check: option.find(".node-input-option-check:checked").val(),
           value: option.find(".node-input-option-value").val(),
         };
 
         node.options.push(o);
       });
+    },
+    oneditresize: function () {
+      changeGroup(getGroupGrid(this.id));
     },
   });
 </script>
@@ -153,10 +230,19 @@
     <input type="text" id="node-input-group" />
   </div>
   <div class="form-row">
-    <label><i class="fa fa-object-group"></i> Size</label>
-    <input type="hidden" id="node-input-width" />
-    <input type="hidden" id="node-input-height" />
-    <button class="editor-button" id="node-input-size"></button>
+    <label for="node-input-group-table"><i class="fa fa-table"></i> Group table</label>
+    <div id="node-input-group-table" style="width:70%; display: inline-block;">
+      <div style="margin-bottom:10px">
+        <label for="node-input-widgetX" style="width:auto;">x</label>
+        <input type="text" id="node-input-widgetX" value="0" style="width:30px; margin-right:10px;" />
+        <label for="node-input-widgetY" style="width:auto;">y </label>
+        <input type="text" id="node-input-widgetY" value="0" style="width:30px; margin-right:10px;" />
+        <label for="node-input-width" style="width:auto;">w</label>
+        <input type="text" id="node-input-width" value="1" style="width:30px; margin-right:10px;" />
+        <label for="node-input-height" style="width:auto;">h</label>
+        <input type="text" id="node-input-height" value="1" style="width:30px; margin-right:10px;" />
+      </div>
+    </div>
   </div>
   <div class="form-row">
     <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
@@ -199,5 +285,28 @@
 </script>
 
 <script type="text/html" data-help-name="soop_list">
-  <p>Adds a list type widget to the user interface.</p>
+  <p>Adds a list on the dashboard</p>
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">String</span></dt>
+    <dd>the payload of the message</dd>
+  </dl>
+
+  <h3>Details</h3>
+  <ol class="node-ports">
+    <li>
+      List Type
+      <dl class="message-properties">
+        <dt>Ordered, Unordered, Checkbox <span class="property-type">String</span></dt>
+        <dd>The list has several modes. ordered list, unordered list, checkbox list</dd>
+      </dl>
+    </li>
+    <li>
+      Forward Input
+      <dl class="message-properties">
+        <dt>Input list <span class="property-type">String Array</span></dt>
+        <dd>Sets the input array to options.</dd>
+      </dl>
+    </li>
+  </ol>
 </script>

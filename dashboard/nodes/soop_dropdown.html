@@ -1,104 +1,165 @@
-<style></style>
 <script type="text/javascript">
+  const dropdownPositionSelector = "#node-input-widgetX, #node-input-widgetY, #node-input-width, #node-input-height";
+  function getGroupGrid(nodeId) {
+    const groupId = $("#node-input-group").val();
+    const groupNode = RED.nodes.node(groupId);
+    groupNode._def.reflectEdit(groupId, nodeId);
+    return groupNode.groupState;
+  }
+  function getXYWH() {
+    const x = parseInt($("#node-input-widgetX").val());
+    const y = parseInt($("#node-input-widgetY").val());
+    const w = parseInt($("#node-input-width").val());
+    const h = parseInt($("#node-input-height").val());
+    return { x, y, w, h };
+  }
+  // Validate the widget to place on (x, y, w, h).
+  function validateXYWH(arr) {
+    const { x, y, w, h } = getXYWH();
+    // If x, y, w, h is under or over idx of arr -> return false
+    if (x < 0 || y < 0 || w <= 0 || h <= 0 || w > 12 || x + w > arr[0].length || y + h > arr.length) {
+      return false;
+    }
+    // If the space is alredy filled, return false
+    for (let i = x; i < x + w; i++) {
+      for (let j = y; j < y + h; j++) {
+        if (arr[j][i]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  // Create a table with array
+  function newTable(arr) {
+    const row = arr.length;
+    const col = arr[0].length;
+    // Append a row for column header(1,2,....)
+    $("#group-table>tbody").append('<tr id="col-header"></tr>');
+    $("#col-header").append("<th></th>");
+    for (let j = 0; j < col; j++) {
+      $("#col-header").append(`<th scope="col">${j}</th>`);
+    }
+    // Append group row and col
+    for (let i = 0; i < row; i++) {
+      // append row
+      $("#group-table>tbody").append(`<tr id="row${i}"></tr>`);
+      // Append a col for row header(1,2,...)
+      $(`#row${i}`).append(`<th scope="row" class="row-header">${i}</th>`);
+      // Append col
+      for (let j = 0; j < col; j++) {
+        const tag = `<td id="col${j}" class="col ${arr[i][j] ? "filled" : "empty"}" ></td>`;
+        $(`#row${i}`).append(tag);
+      }
+    }
+    // Table Design
+    $(".col").css("border", "dotted black 1px");
+    $(".col").css("width", "20px");
+    $(".col").css("height", "20px");
+    $(".filled").css("background-color", "#DEDEDE");
+    $(".empty").css("background-color", "#FFFFFF");
+    $("th").css("border", "none");
+  }
+  // Remove color for new node and return the original color for filled or empty space
+  function removeColor(w, h) {
+    for (let i = 0; i < w; i++) {
+      for (let j = 0; j < h; j++) {
+        $(`#row${j}>#col${i}`).removeClass("new-node");
+      }
+    }
+    $(".filled").css("background-color", "#DEDEDE");
+    $(".empty").css("background-color", "#FFFFFF");
+  }
+  // Add color for new node
+  function addColor() {
+    const { x, y, w, h } = getXYWH();
+    for (let i = x; i < x + w; i++) {
+      for (let j = y; j < y + h; j++) {
+        $(`#row${j}>#col${i}`).addClass("new-node");
+      }
+    }
+    $(".new-node").css("background-color", "#D9E5FF");
+  }
+  // Add new node on group grid
+  function addNewNode(arr) {
+    // Remove 'new-node' class in every row-col
+    const { x, y, w, h } = getXYWH();
+    removeColor(arr[0].length, arr.length);
+    // if (x, y, w, h) is ok, then put. or error.
+    if (validateXYWH(arr)) {
+      addColor();
+      $(dropdownPositionSelector).removeClass("input-error");
+    } else {
+      $(dropdownPositionSelector).addClass("input-error");
+    }
+  }
+  function changeGroup(arr) {
+    if ($("#node-input-group-table > table").length) {
+      const row = arr.length;
+      const col = arr[0].length;
+      const currow = $("#group-table>tbody>tr").length - 1;
+      const curcol = $("#group-table>tbody>#row1>td").length;
+      if (currow !== row || curcol !== col) {
+        $("#node-input-group-table").children("table").remove();
+        $("#node-input-group-table").append('<table border="1" id="group-table"><tbody></tbody></table>');
+        newTable(arr);
+        addNewNode(arr);
+        $(dropdownPositionSelector).off();
+        $(dropdownPositionSelector).on("change", () => addNewNode(arr));
+      }
+    }
+  }
   RED.nodes.registerType("soop_dropdown", {
     category: "soop-dashboard",
-    color: "rgb(255, 189, 27)",
+    color: "#1153FC",
     defaults: {
-      name: {
-        value: "",
-      },
-      label: {
-        value: "dropdown",
-      },
-      tooltip: {
-        value: "",
-      },
-      place: { value: "Select" },
-      group: {
-        type: "soop_group",
-        required: true,
-      },
-      order: {
-        value: 0,
-      },
-      width: {
-        value: 0,
-        validate: function (v) {
-          var width = v || 0;
-          var currentGroup = $("#node-input-group").val() || this.group;
-          var groupNode = RED.nodes.node(currentGroup);
-          var valid = !groupNode || +width <= +groupNode.width;
-          $("#node-input-size").toggleClass("input-error", !valid);
-          return valid;
-        },
-      },
-      height: {
-        value: 0,
-        validate: function (v) {
-          var height = v || 0;
-          var currentGroup = $("#node-input-group").val() || this.group;
-          var groupNode = RED.nodes.node(currentGroup);
-          var valid = !groupNode || +height <= +groupNode.height;
-          $("#node-input-size").toggleClass("input-error", !valid);
-          return valid;
-        },
-      },
+      name: { value: "" },
+      label: { value: "dropdown" },
+      tooltip: { value: "" },
+      group: { type: "soop_group", required: true },
+      width: { value: 1, validate: RED.validators.number(), required: true },
+      height: { value: 1, validate: RED.validators.number(), required: true },
+      widgetX: { value: 0, validate: RED.validators.number(), required: true },
+      widgetY: { value: 0, validate: RED.validators.number(), required: true },
       options: {
         value: [{ value: "", label: "" }],
         validate: function (v) {
           var unique = new Set(
             v.map(function (o) {
               return o.value;
-            })
+            }),
           );
           return v.length == unique.size;
         },
       },
       payload: { value: "" },
-      topic: {
-        value: "topic",
-        validate: RED.validators.hasOwnProperty("typedInput")
-          ? RED.validators.typedInput("topicType")
-          : function (v) {
-              return true;
-            },
-      },
-      passthru: { value: true },
-      multipleSelect: { value: false },
-      topicType: {
-        value: "msg",
-      },  
     },
     inputs: 1,
     outputs: 1,
-    icon: "ui_switch.png",
-    paletteLabel: "dropdown",
-    outputLabels: function () {
-      return this.min + " - " + this.max;
-    },
+    icon: "font-awesome/fa-caret-square-o-down",
+    paletteLabel: "soop_dropdown",
     label: function () {
-      return (
-        this.name ||
-        (~this.label.indexOf("{{") ? null : this.label) ||
-        "dropdown"
-      );
+      return this.name || "soop_dropdown";
     },
     labelStyle: function () {
       return this.name ? "node_label_italic" : "";
     },
     oneditprepare: function () {
+      $.fn.groupTable = function (arr) {
+        $(this).append('<table border="1" id="group-table"><tbody></tbody></table>');
+        newTable(arr);
+        $(dropdownPositionSelector).on("change", () => addNewNode(arr));
+      };
+      $("#node-input-group-table").groupTable(getGroupGrid(this.id));
+
       if (this.multiple === undefined) {
         $("#node-input-multiple").prop("checked", false);
       }
-      $("#node-input-size").elementSizer({
-        width: "#node-input-width",
-        height: "#node-input-height",
-        group: "#node-input-group",
-      });
+
       var un = new Set(
         this.options.map(function (o) {
           return o.value;
-        })
+        }),
       );
       if (this.options.length == un.size) {
         $("#valWarning").hide();
@@ -108,8 +169,7 @@
 
       function generateOption(i, option) {
         var container = $("<li/>", {
-          style:
-            "background: #fff; margin:0; padding:8px 0px 0px; border-bottom: 1px solid #ccc;",
+          style: "background: #fff; margin:0; padding:8px 0px 0px; border-bottom: 1px solid #ccc;",
         });
         var row = $("<div/>").appendTo(container);
         var row2 = $("<div/>", {
@@ -120,7 +180,7 @@
         }).appendTo(container);
 
         $(
-          '<i style="color:#eee; cursor:move; margin-left:3px;" class="node-input-option-handle fa fa-bars"></i>'
+          '<i style="color:#eee; cursor:move; margin-left:3px;" class="node-input-option-handle fa fa-bars"></i>',
         ).appendTo(row);
 
         var valueField = $("<input/>", {
@@ -164,13 +224,8 @@
       }
 
       $("#node-input-add-option").click(function () {
-        generateOption(
-          $("#node-input-option-container").children().length + 1,
-          {}
-        );
-        $("#node-input-option-container-div").scrollTop(
-          $("#node-input-option-container-div").get(0).scrollHeight
-        );
+        generateOption($("#node-input-option-container").children().length + 1, {});
+        $("#node-input-option-container-div").scrollTop($("#node-input-option-container-div").get(0).scrollHeight);
       });
 
       for (var i = 0; i < this.options.length; i++) {
@@ -183,11 +238,8 @@
         handle: ".node-input-option-handle",
         cursor: "move",
       });
-
-      $("#node-input-topic").typedInput({
-        default: "str",
-        typeField: $("#node-input-topicType"),
-        types: ["str", "msg", "flow", "global"],
+      $("#node-input-group").on("change", () => {
+        changeGroup(getGroupGrid(this.id));
       });
     },
     oneditsave: function () {
@@ -201,119 +253,110 @@
           value: option.find(".node-input-option-value").typedInput("value"),
           type: option.find(".node-input-option-value").typedInput("type"),
         };
-        if (
-          option.find(".node-input-option-value").typedInput("type") === "num"
-        ) {
+        if (option.find(".node-input-option-value").typedInput("type") === "num") {
           o.value = Number(o.value);
         }
-        if (
-          option.find(".node-input-option-value").typedInput("type") === "bool"
-        ) {
+        if (option.find(".node-input-option-value").typedInput("type") === "bool") {
           o.value = o.value == "true";
         }
         node.options.push(o);
       });
     },
-    oneditresize: function () {},
+    oneditresize: function () {
+      changeGroup(getGroupGrid(this.id));
+    },
   });
 </script>
 
 <script type="text/html" data-template-name="soop_dropdown">
-    <div class="form-row">
-      <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
-      <input type="text" id="node-input-group" />
-    </div>
-    <div class="form-row">
-      <label><i class="fa fa-object-group"></i> Size</label>
-      <input type="hidden" id="node-input-width" />
-      <input type="hidden" id="node-input-height" />
-      <button class="editor-button" id="node-input-size"></button>
-    </div>
-    <div class="form-row">
-      <label for="node-input-label"><i class="fa fa-tag"></i> Label</label>
-      <input type="text" id="node-input-label" placeholder="optional label" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-tooltip"
-        ><i class="fa fa-info-circle"></i> Tooltip</label
-      >
-      <input type="text" id="node-input-tooltip" placeholder="optional tooltip" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-place"><i class="fa fa-tag"></i> Placeholder</label>
-      <input
-        type="text"
-        id="node-input-place"
-        placeholder="optional placeholder"
-      />
-    </div>
-    <div
-      class="form-row node-input-option-container-row"
-      style="margin-bottom: 0px;width: 100%"
-    >
-      <label for="node-input-width" style="vertical-align:top"
-        ><i class="fa fa-list-alt"></i> Options</label
-      >
-      <div
-        id="node-input-option-container-div"
-        style="box-sizing:border-box; border-radius:5px; height:257px; padding:5px; border:1px solid #ccc; overflow-y:scroll; display:inline-block; width:calc(70% + 15px);"
-      >
-        <span id="valWarning" style="color:#910000"
-          ><b>All Values must be unique.</b></span
-        >
-        <ol
-          id="node-input-option-container"
-          style="list-style-type:none; margin:0;"
-        ></ol>
+  <div class="form-row">
+    <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
+    <input type="text" id="node-input-group" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-group-table"><i class="fa fa-table"></i> Group table</label>
+    <div id="node-input-group-table" style="width:70%; display: inline-block;">
+      <div style="margin-bottom:10px">
+        <label for="node-input-widgetX" style="width:auto;">x</label>
+        <input type="text" id="node-input-widgetX" value="0" style="width:30px; margin-right:10px;" />
+        <label for="node-input-widgetY" style="width:auto;">y </label>
+        <input type="text" id="node-input-widgetY" value="0" style="width:30px; margin-right:10px;" />
+        <label for="node-input-width" style="width:auto;">w</label>
+        <input type="text" id="node-input-width" value="1" style="width:30px; margin-right:10px;" />
+        <label for="node-input-height" style="width:auto;">h</label>
+        <input type="text" id="node-input-height" value="1" style="width:30px; margin-right:10px;" />
       </div>
     </div>
-    <div class="form-row">
-      <a
-        href="#"
-        class="editor-button editor-button-small"
-        id="node-input-add-option"
-        style="margin-top:4px; margin-left:103px;"
-        ><i class="fa fa-plus"></i> <span>option</span></a
-      >
+  </div>
+  <div class="form-row">
+    <label for="node-input-label"><i class="fa fa-tag"></i> Label</label>
+    <input type="text" id="node-input-label" placeholder="optional label" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-tooltip"><i class="fa fa-info-circle"></i> Tooltip</label>
+    <input type="text" id="node-input-tooltip" placeholder="optional tooltip" />
+  </div>
+  <div class="form-row node-input-option-container-row" style="margin-bottom: 0px;width: 100%">
+    <label for="node-input-width" style="vertical-align:top"><i class="fa fa-list-alt"></i> Options</label>
+    <div
+      id="node-input-option-container-div"
+      style="box-sizing:border-box; border-radius:5px; height:257px; padding:5px; border:1px solid #ccc; overflow-y:scroll; display:inline-block; width:calc(70% + 15px);"
+    >
+      <span id="valWarning" style="color:#910000"><b>All Values must be unique.</b></span>
+      <ol id="node-input-option-container" style="list-style-type:none; margin:0;"></ol>
     </div>
-    <div class="form-row">
-      <label style="width:auto" for="node-input-multiple"
-        ><i class="fa fa-th-list"></i> Allow multiple selections from list:
-      </label>
-      <input
-        type="checkbox"
-        checked
-        id="node-input-multiple"
-        style="display:inline-block; width:auto; vertical-align:top;"
-      />
-    </div>
-    <div class="form-row">
-      <label style="width:auto" for="node-input-passthru"
-        ><i class="fa fa-arrow-right"></i> If <code>msg</code> arrives on input,
-        pass through to output:
-      </label>
-      <input
-        type="checkbox"
-        checked
-        id="node-input-passthru"
-        style="display:inline-block; width:auto; vertical-align:top;"
-      />
-    </div>
-    <div class="form-row">
-      <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
-      <input type="text" id="node-input-topic" placeholder="optional msg.topic" />
-      <input type="hidden" id="node-input-topicType" />
-    </div>
-    <div class="form-row">
-      <label for="node-input-className"><i class="fa fa-code"></i> Class</label>
-      <input
-        type="text"
-        id="node-input-className"
-        placeholder="Optional CSS class name(s) for widget"
-      />
-    </div>
-    <div class="form-row">
-      <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-      <input type="text" id="node-input-name" />
-    </div>
-  </script>
+  </div>
+  <div class="form-row">
+    <a
+      href="#"
+      class="editor-button editor-button-small"
+      id="node-input-add-option"
+      style="margin-top:4px; margin-left:103px;"
+      ><i class="fa fa-plus"></i> <span>option</span></a
+    >
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="soop_dropdown">
+  <p>Adds a dropdown on the dashboard</p>
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">String</span></dt>
+    <dd>the payload of the message.</dd>
+  </dl>
+
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">String</span></dt>
+    <dd>Selected drop-down values in the dashboard.</dd>
+  </dl>
+
+  <h3>Details</h3>
+  <ol class="node-ports">
+    <li>
+      Dropdown Options
+      <dl class="message-properties">
+        <dt>Value, Label <span class="property-type">String</span></dt>
+        <dd>value to use in the dropdown, and the label to show.</dd>
+      </dl>
+    </li>
+    <li>
+      Forward Input
+      <dl class="message-properties">
+        <dt>payload <span class="property-type">String</span></dt>
+        <dd>Sets msg.payload to the initial value.</dd>
+      </dl>
+    </li>
+    <li>
+      Send Payload
+      <dl class="message-properties">
+        <dt>send <span class="property-type"> String </span></dt>
+        <dd>Sends the selected value to output. The output value is msg.payload</dd>
+      </dl>
+    </li>
+  </ol>
+</script>

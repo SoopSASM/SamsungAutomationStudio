@@ -37,6 +37,48 @@ const fontSize = {
   xxl: "48px",
 };
 
-// const fontWeight = {};
+const calculateWidth = (w, currentGroupWidth, currentGroupW) => {
+  if (w === currentGroupW) {
+    return currentGroupWidth;
+  }
+  const unitWidth = Math.round(currentGroupWidth / currentGroupW);
+  return unitWidth * w;
+};
 
-export { mainColor, gradientColor, bgColor, groupColor, fontColor, fontSize };
+const calculateLeft = (x, currentGroupWidth, currentGroupW) => {
+  const unitWidth = Math.round(currentGroupWidth / currentGroupW);
+  return unitWidth * x;
+};
+
+const calculateHeight = (h, currentGroupH, isNameVisible = true) => {
+  if (isNameVisible) {
+    const unitHeight = Math.round((currentGroupH * 75 + (currentGroupH - 1) * 10 - 30) / currentGroupH);
+    return unitHeight * h;
+  } else {
+    const unitHeight = Math.round((currentGroupH * 75 + (currentGroupH - 1) * 10) / currentGroupH);
+    return unitHeight * h;
+  }
+};
+
+const calculateTop = (y, currentGroupH, isNameVisible = true) => {
+  if (isNameVisible) {
+    const unitHeight = Math.round((currentGroupH * 75 + (currentGroupH - 1) * 10 - 30) / currentGroupH);
+    return 30 + y * unitHeight;
+  } else {
+    const unitHeight = Math.round((currentGroupH * 75 + (currentGroupH - 1) * 10) / currentGroupH);
+    return unitHeight * y;
+  }
+};
+
+export {
+  mainColor,
+  gradientColor,
+  bgColor,
+  groupColor,
+  fontColor,
+  fontSize,
+  calculateHeight,
+  calculateLeft,
+  calculateTop,
+  calculateWidth,
+};

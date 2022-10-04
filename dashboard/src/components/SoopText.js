@@ -1,52 +1,71 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { fontSize, fontColor } from "../assets/DesignOption";
+import { fontColor } from "../assets/DesignOption";
+import { calculateHeight, calculateWidth, calculateLeft, calculateTop } from "../assets/DesignOption";
 
-// FIXME: mode에 따른 색상변경 있음
-// FIXME: Layout에 따른 배치 변경 있음
 const flexOption = [
   ["row", "flex-start"],
-  ["row", "flex-end"],
   ["row", "space-between"],
   ["row", "space-evenly"],
+  ["row", "flex-end"],
   ["column", "center"],
 ];
 
-const height = 48; // FIXME: 추후 그리드 사이즈에 맞게 바뀔것, width도 마찬가지
-
-const BoardText = styled.div`
+const BoardTextContainer = styled.div`
+  position: absolute;
+  left: ${({ layout }) => `${layout[0]}px;`}
+  top: ${({ layout }) => `${layout[1]}px;`}
   display: flex;
-  flex-direction: ${flexOption[3][0]};
-  justify-content: ${flexOption[3][1]};
+  flex-direction: ${({ textLayout }) => flexOption[textLayout][0]};
+  justify-content: ${({ textLayout }) => flexOption[textLayout][1]};
   align-items: center;
-  width: 200px;
-  height: ${height}px;
-  font-size: ${fontSize.md};
+  width: ${({ layout }) => `${layout[2]}px;`}
+  height:${({ layout }) => `${layout[3]}px;`}
+  font-size: ${props => props.fontSize}px;
   color: ${fontColor.light};
-  padding: 0;
-  margin: 0;
+  padding: 5px 10px;
+  box-sizing: border-box;
 `;
 
 const BoardTextLabel = styled.div`
-  margin: 0px 10px;
+  margin: 0px;
 `;
 
 const BoardTextValue = styled.div`
-  margin: 0px 10px;
+  margin: 0px;
   font-family: "Pretendard-Bold";
 `;
 
-const SoopText = () => {
+const SoopText = ({ currentGroupW, currentGroupWidth, currentGroupH, node, nameVisible }) => {
+  const [currentLabel, setCurrentLabel] = useState("");
+  const [currentValue, setCurrentValue] = useState("");
+
+  const layout = [
+    calculateLeft(parseInt(node?.widgetX), currentGroupWidth, currentGroupW),
+    calculateTop(parseInt(node?.widgetY), currentGroupH, nameVisible),
+    calculateWidth(parseInt(node?.width), currentGroupWidth, currentGroupW),
+    calculateHeight(parseInt(node?.height), currentGroupH, nameVisible),
+  ];
+
+  useEffect(() => {
+    if (Array.isArray(node?.states) && node?.states[0]) {
+      setCurrentValue(node?.states[0]?.value);
+    } else {
+      setCurrentValue(node?.value);
+    }
+    setCurrentLabel(node?.label);
+  }, [node]);
+
   return (
     <>
-      <BoardText>
+      <BoardTextContainer fontSize={node?.fontSize} textLayout={node?.layout} layout={layout}>
         <BoardTextLabel>
-          <span>label</span>
+          <span>{currentLabel}</span>
         </BoardTextLabel>
         <BoardTextValue>
-          <span>value</span>
+          <span>{currentValue}</span>
         </BoardTextValue>
-      </BoardText>
+      </BoardTextContainer>
     </>
   );
 };

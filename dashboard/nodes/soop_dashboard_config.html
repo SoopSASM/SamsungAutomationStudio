@@ -1,7 +1,6 @@
 <script src="socket.io/socket.io.js"></script>
 
 <script>
-  // TODO : import from common.js
   const EDITOR_SOCKET_TYPE = {
     FLOW_DEPLOYED: "flow-deployed",
   };
@@ -28,8 +27,13 @@
 
           for (const group of node.users) {
             const groupObject = {
-              tabId: group.id,
-              tabName: group.name,
+              groupId: group.id,
+              groupName: group.name,
+              groupX: group.groupX,
+              groupY: group.groupY,
+              width: group.width,
+              height: group.height,
+              nameVisible: group.displayVisible,
               nodes: [],
             };
 

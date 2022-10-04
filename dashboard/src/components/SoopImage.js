@@ -1,32 +1,35 @@
 import React from "react";
 import styled from "styled-components";
+import { calculateHeight, calculateWidth, calculateLeft, calculateTop } from "../assets/DesignOption";
 
 const Image = styled.img`
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  left: ${({ layout }) => `${layout[0]}px;`}
+  top: ${({ layout }) => `${layout[1]}px;`}
+  width: ${({ layout }) => `${layout[2]}px;`}
+  height:${({ layout }) => `${layout[3]}px;`}
   object-fit: ${({ objectFit }) => {
-    return objectFit;
+    return `${objectFit};`;
   }}}
-  border-radius: 10px;
+  border-radius: ${({ isFull }) => isFull && `10px;`}
 `;
 
-const SoopImage = () => {
-  const exampleData = {
-    node: {
-      tooltip: "This is Image Node",
-      source: "link", //  upload, link
-      upload: "???",
-      link: "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg",
-      objectFit: "cover",
-    },
-    states: {},
-  };
+const SoopImage = ({ currentGroupW, currentGroupWidth, currentGroupH, node, nameVisible }) => {
+  const layout = [
+    calculateLeft(parseInt(node?.widgetX), currentGroupWidth, currentGroupW),
+    calculateTop(parseInt(node?.widgetY), currentGroupH, nameVisible),
+    calculateWidth(parseInt(node?.width), currentGroupWidth, currentGroupW),
+    calculateHeight(parseInt(node?.height), currentGroupH, nameVisible),
+  ];
+  const isFull = parseInt(node?.width) === currentGroupW && parseInt(node?.height) === currentGroupH ? true : false;
 
-  switch (exampleData.node.source) {
+  switch (node?.option) {
     case "upload":
-      return <Image src="" objectFit={exampleData.node.objectFit} />;
+      return (
+        <Image isFull={isFull} layout={layout} src={`data:image/jpg;base64,${node?.uploads}`} objectFit={node?.fit} />
+      );
     case "link":
-      return <Image src={exampleData.node.link} objectFit={exampleData.node.objectFit} />;
+      return <Image isFull={isFull} layout={layout} src={node?.link} objectFit={node?.fit} />;
   }
 };
 

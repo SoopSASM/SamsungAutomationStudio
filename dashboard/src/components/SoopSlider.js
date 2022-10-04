@@ -4,15 +4,18 @@ import { Slider } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { mainColor, fontSize, fontColor } from "../assets/DesignOption";
 import { sendMessage } from "../utils/socket";
+import { calculateHeight, calculateWidth, calculateLeft, calculateTop } from "../assets/DesignOption";
 
 const SliderContainer = styled.div`
-  width: 100%;
+  position: absolute;
+  width: ${({ layout }) => `${layout[2]}px;`}
+  height:${({ layout }) => `${layout[3]}px;`}
   padding: 5px 10px;
   box-sizing: border-box;
-  position: absolute;
-  top: 100px;
-  width: 300px;
+  left: ${({ layout }) => `${layout[0]}px;`}
+  top: ${({ layout }) => `${layout[1]}px;`}
   display: flex;
+  align-items: center;
   color: ${fontColor.light};
   font-family: "Pretendard-Bold";
   font-size: ${fontSize.md};
@@ -21,63 +24,60 @@ const SliderContainer = styled.div`
 const SliderLabel = styled.div`
   display: inline-block;
   width: fit-content;
-  margin: auto 10px;
+  white-space: nowrap;
+  margin-right: 13px;
 `;
 
-const SEND_TYPE = {
+const WHEN_TYPE = {
   ALWAYS: "always",
   RELEASE: "release",
 };
 
-const SoopSlider = ({ node, states }) => {
-  const exampleData = {
-    color: "pink",
-    label: "This is Label!",
-    tooltip: "slider_label",
-    range: [0, 100, 5],
-    when: "always",
-    invert: false,
-    payload: 50,
-  };
+const SoopSlider = ({ currentGroupW, currentGroupWidth, currentGroupH, node, nameVisible }) => {
+  const layout = [
+    calculateLeft(parseInt(node?.widgetX), currentGroupWidth, currentGroupW),
+    calculateTop(parseInt(node?.widgetY), currentGroupH, nameVisible),
+    calculateWidth(parseInt(node?.width), currentGroupWidth, currentGroupW),
+    calculateHeight(parseInt(node?.height), currentGroupH, nameVisible),
+  ];
 
-  // FIXME: 현재 보이는 값 -> props에서 들어오는 것으로 수정해야 한다.
-  const [value, setValue] = useState(exampleData.payload);
+  const [value, setValue] = useState("0");
 
   useEffect(() => {
-    if (Array.isArray(states) && states[0]) {
-      setValue(states[0].value);
+    if (Array.isArray(node?.states) && node?.states[0]) {
+      setValue(node?.states[0]?.value);
     }
-  }, [states]);
+  }, [node]);
 
   const muiTheme = createTheme({
     palette: {
       primary: {
-        main: mainColor[exampleData.color],
+        main: mainColor[node?.colorPicking],
       },
     },
   });
 
   function onChangeCommitted(e, v) {
-    if (node.send == SEND_TYPE.RELEASE) sendMessage(node.id, { value: v });
+    if (node?.when == WHEN_TYPE.RELEASE) sendMessage(node?.id, { value: v });
   }
 
   function onChangeValue(e, v) {
     setValue(v);
-    if (node.send == SEND_TYPE.ALWAYS) sendMessage(node.id, { value: v });
+    if (node?.when == WHEN_TYPE.ALWAYS) sendMessage(node?.id, { value: v });
   }
 
   return (
     <>
-      <SliderContainer>
-        <SliderLabel>{exampleData.label}</SliderLabel>
+      <SliderContainer layout={layout}>
+        <SliderLabel>{node?.label}</SliderLabel>
         <ThemeProvider theme={muiTheme}>
           <Slider
-            value={value}
+            value={parseInt(value)}
             aria-label="Default"
             valueLabelDisplay="auto"
-            min={node.min}
-            max={node.max}
-            step={node.step}
+            min={node?.min}
+            max={node?.max}
+            step={parseInt(node?.step)}
             onChange={onChangeValue}
             onChangeCommitted={onChangeCommitted}
           />
