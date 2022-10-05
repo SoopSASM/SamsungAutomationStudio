@@ -4,7 +4,7 @@
   const EDITOR_SOCKET_TYPE = {
     FLOW_DEPLOYED: "flow-deployed",
   };
-  const dashboard_config = "soop_dashboard_config";
+  const DASHBOARD_CONFIG = "soop_dashboard_config";
 </script>
 
 <script type="text/javascript">
@@ -57,7 +57,7 @@
   function createDashboardConfigNode() {
     const configNodes = [];
     RED.nodes.eachConfig(node => {
-      if (node.type === dashboard_config) {
+      if (node.type === DASHBOARD_CONFIG) {
         configNodes.push(node);
       }
     });
@@ -71,8 +71,8 @@
     if (!dashboardConfgNode) {
       dashboardConfgNode = {
         id: RED.nodes.id(),
-        _def: RED.nodes.getType(dashboard_config),
-        type: dashboard_config,
+        _def: RED.nodes.getType(DASHBOARD_CONFIG),
+        type: DASHBOARD_CONFIG,
         users: [],
       };
     }
@@ -83,7 +83,7 @@
 </script>
 
 <script type="text/javascript">
-  RED.nodes.registerType(dashboard_config, {
+  RED.nodes.registerType(DASHBOARD_CONFIG, {
     category: "config",
     defaults: {
       name: {},
@@ -96,6 +96,6 @@
   });
 </script>
 
-<script type="text/html" data-template-name="dashboard_config">
+<script type="text/html" data-template-name="DASHBOARD_CONFIG">
   <div>This is configuration node for soop dashboard.</div>
 </script>
