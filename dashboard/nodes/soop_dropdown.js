@@ -6,11 +6,11 @@ module.exports = function (RED) {
     const node = this;
 
     var valueMap = new Map();
-    var labelMap = new Map();
+    var reverseValueMap = new Map();
     for (var i = 0; i < config.options.length; i++) {
       let option = config.options[i];
       valueMap.set(option.value, i);
-      labelMap.set(i, option.label);
+      reverseValueMap.set(i, option.value);
     }
 
     node.on("input", function (msg) {
@@ -25,10 +25,10 @@ module.exports = function (RED) {
     dashboard.addNode({
       node: node,
       onMessage: message => {
-        let label = labelMap.get(message.value);
-        if (!label) label = labelMap.get(0);
+        let value = reverseValueMap.get(message.value);
+        if (!value) reverseValueMap.get(0);
         node.send({
-          payload: label,
+          payload: value,
         });
       },
     });
