@@ -4,8 +4,12 @@
   function getGroupGrid(nodeId) {
     const groupId = $("#node-input-group").val();
     const groupNode = RED.nodes.node(groupId);
-    groupNode._def.reflectEdit(groupId, nodeId);
-    return groupNode.groupState;
+    if (groupNode) {
+      groupNode._def.reflectEdit(groupId, nodeId);
+      return groupNode.groupState;
+    } else {
+      return [];
+    }
   }
   function getXYWH() {
     const x = parseInt($("#node-input-widgetX").val());
@@ -33,6 +37,8 @@
   }
   // Create a table with array
   function newTable(arr) {
+    if (!Array.isArray(arr) || !arr[0]) return;
+
     const row = arr.length;
     const col = arr[0].length;
     // Append a row for column header(1,2,....)
@@ -83,6 +89,7 @@
   }
   // Add new node on group grid
   function addNewNode(arr) {
+    if (!Array.isArray(arr) || !arr[0]) return;
     // Remove 'new-node' class in every row-col
     const { x, y, w, h } = getXYWH();
     removeColor(arr[0].length, arr.length);
@@ -95,6 +102,7 @@
     }
   }
   function changeGroup(arr) {
+    if (!Array.isArray(arr) || !arr[0]) return;
     if ($("#node-input-group-table > table").length) {
       const row = arr.length;
       const col = arr[0].length;
@@ -168,6 +176,11 @@
       $.fn.groupTable = function (arr) {
         $(this).append('<table border="1" id="group-table"><tbody></tbody></table>');
         newTable(arr);
+        if (!Array.isArray(arr) || !arr[0]) {
+          $("#input-xywh").hide();
+        } else {
+          $("#input-xywh").show();
+        }
         $(imagePositionSelector).on("change", () => addNewNode(arr));
       };
       $("#node-input-group-table").groupTable(getGroupGrid(this.id));
@@ -208,6 +221,7 @@
       $("#node-input-group").on("change", () => {
         changeGroup(getGroupGrid(this.id));
       });
+      console.log("value", $("#node-input-option").val());
     },
     oneditsave: function () {
       if ($("#node-input-option").val() === "upload") {
@@ -218,7 +232,13 @@
       }
     },
     oneditresize: function () {
-      changeGroup(getGroupGrid(this.id));
+      const arr = getGroupGrid(this.id);
+      changeGroup(arr);
+      if (!Array.isArray(arr) || !arr[0]) {
+        $("#input-xywh").hide();
+      } else {
+        $("#input-xywh").show();
+      }
     },
   });
 </script>
@@ -230,7 +250,7 @@
     <input type="text" id="node-input-group" />
   </div>
   <!-- Size -->
-  <div class="form-row">
+  <div class="form-row" id="input-xywh">
     <label for="node-input-group-table"><i class="fa fa-table"></i> Group table</label>
     <div id="node-input-group-table" style="width:70%; display: inline-block;">
       <div style="margin-bottom:10px">
