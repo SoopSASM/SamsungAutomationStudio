@@ -5,13 +5,17 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     const node = this;
 
+    var valueMap = new Map();
+    var labelMap = new Map();
+    for (var i = 0; i < config.options.length; i++) {
+      let option = config.options[i];
+      valueMap.set(option.value, i);
+      labelMap.set(i, option.label);
+    }
+
     node.on("input", function (msg) {
-      let value = msg.payload;
-      if (!isNaN(parseInt(value))) {
-        value = parseInt(value);
-      } else {
-        value = 0;
-      }
+      let value = valueMap.get(msg.payload);
+      if (!value) value = 0;
       dashboard.emitState({
         nodeId: node.id,
         value: value,
@@ -21,8 +25,10 @@ module.exports = function (RED) {
     dashboard.addNode({
       node: node,
       onMessage: message => {
+        let label = labelMap.get(message.value);
+        if (!label) label = labelMap.get(0);
         node.send({
-          payload: message.value,
+          payload: label,
         });
       },
     });
