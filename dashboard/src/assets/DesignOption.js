@@ -15,6 +15,7 @@ const gradientColor = {
 };
 
 const bgColor = {
+  dark: "#16113A",
   light: "#F3F3F9",
 };
 
@@ -35,6 +36,23 @@ const fontSize = {
   lg: "20px",
   xl: "32px",
   xxl: "48px",
+};
+
+const lightTheme = {
+  bgColor: "#F3F3F9",
+  fontColor: "#737373",
+  groupColor: "#FFFFFF",
+};
+
+const darkTheme = {
+  bgColor: "#16113A",
+  fontColor: "#F3F2F2",
+  groupColor: "#3B465E",
+};
+
+const theme = {
+  lightTheme,
+  darkTheme,
 };
 
 const calculateWidth = (w, currentGroupWidth, currentGroupW) => {
@@ -71,6 +89,9 @@ const calculateTop = (y, currentGroupH, isNameVisible = true) => {
 };
 
 export {
+  darkTheme,
+  lightTheme,
+  theme,
   mainColor,
   gradientColor,
   bgColor,
