@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { AppBar, Box, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemButton } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { RiMenuUnfoldFill } from "react-icons/ri";
-import { AiFillSetting, AiFillSave } from "react-icons/ai";
-import IsEditingCircle from "../assets/images/isEditingCircle.gif";
+import { TbDragDrop } from "react-icons/tb";
+import loadingSpinner from "../assets/images/loadingSpinner.svg";
 
 const SoopNavbar = ({ isEditing, handleIsEditing, currentTab, handleCurrentTab, tabs }) => {
   const [state, setState] = useState({
@@ -53,6 +53,8 @@ const SoopNavbar = ({ isEditing, handleIsEditing, currentTab, handleCurrentTab, 
     );
   };
 
+  const LoadingSpinner = () => <img src={loadingSpinner} />
+
   return (
     <>
       <ThemeProvider theme={muiTheme}>
@@ -77,23 +79,21 @@ const SoopNavbar = ({ isEditing, handleIsEditing, currentTab, handleCurrentTab, 
 
             {!isEditing ? (
               <IconButton
-                color="inherit"
                 onClick={() => {
                   handleIsEditing(true);
                 }}
               >
-                <AiFillSetting />
+                <TbDragDrop />
               </IconButton>
             ) : (
               <div style={{ display: "flex", alignItems: "center" }}>
-                <img src={IsEditingCircle} alt="editing" width={40} style={{ marginRight: 10 }} />
+                <LoadingSpinner />
                 <IconButton
-                  color="inherit"
                   onClick={() => {
                     handleIsEditing(false);
                   }}
                 >
-                  <AiFillSave color="navy" />
+                  <TbDragDrop color="navy" />
                 </IconButton>
               </div>
             )}
